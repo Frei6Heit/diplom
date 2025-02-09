@@ -1,0 +1,93 @@
+$primary-color: #DD9090;
+$secondary-color: #723A3A;
+
+
+.title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 30px;
+    background-color: $primary-color;
+    color: white;
+    -webkit-app-region: drag; // Позволяет перемещать окно
+    padding: 0 10px;
+
+    * {
+        border: none;
+    }
+
+    &-drag {
+        -webkit-app-region: drag; // Позволяет перемещать окно
+    }
+
+    .burger {
+        height: 20px;
+        margin: 3px 0 8px;
+    }
+
+    &-trapezoid {
+            width: 1290px;
+            height: 24px;
+
+            padding: 3px 50px;
+
+            display: flex;
+            justify-content: space-between;
+
+            background-color: $secondary-color;
+            clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 2% 100%);
+    
+
+            .microphone, .decoding {
+                margin-right: 30px;
+                border-right: 2px solid $primary-color;
+                padding: 3px 30px 3px 0;
+
+                width: 70px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 15px;
+                gap: 20px;
+            }
+
+        
+        }
+
+        &-content-left {
+            display: flex;
+        }
+
+        &-content-right {
+            display: flex;
+            gap: 20px;
+        }
+
+
+        // button
+        &-controls {
+            display: flex;
+            gap: 10px;
+            height: 20px;
+            -webkit-app-region: no-drag; // Отключает перемещение для кнопок
+
+            button {
+                background: none;
+                border-radius: 50%;
+                cursor: pointer;
+                width: 20px;
+            }
+
+            .curtail {
+                background-color: #4FBD34;
+            }
+
+            .minimize {
+                background-color: #E7D947;
+            }
+
+            .close {
+                background-color: #F24141;
+            }
+        }
+    }
