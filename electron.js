@@ -5,13 +5,25 @@ let mainWindow;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 800,
+        width: 1200,
         height: 600,
+        minHeight: 800,
+        minWidth: 1200,
         frame: false,  // Убираем стандартную рамку окна
         webPreferences: {
             nodeIntegration: false,  // Отключаем nodeIntegration для безопасности
             contextIsolation: true,  // Включаем contextIsolation
-            preload: path.join(__dirname, 'preload.js'),  // Указываем путь к preload.js
+            preload: path.join(__dirname, 'preload.js'),
+            contentSecurityPolicy: `
+                default-src 'self';
+                script-src 'self';
+                style-src 'self' 'unsafe-inline';
+                img-src 'self' data:;
+                connect-src 'self';
+                font-src 'self';
+                frame-src 'none';
+                object-src 'none';
+            `.replace(/\s+/g, ' ') 
         },
     });
 

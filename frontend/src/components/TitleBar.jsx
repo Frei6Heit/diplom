@@ -11,7 +11,7 @@ const TitleBar = () => {
             <icons.Menu />
         </div>
 
-        <div class="title-bar-trapezoid">
+        <div className="title-bar-trapezoid">
             <div className="title-bar-content-left">
                 <div className="microphone">
                     <icons.Microphone />

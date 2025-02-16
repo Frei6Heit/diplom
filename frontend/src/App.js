@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import "./styles/main.scss";
 import TitleBar from './components/TitleBar';
+import Auth from './components/Auth'; // Импортируем компонент Main
 
 function App() {
     const [data, setData] = useState(null);
@@ -13,11 +15,9 @@ function App() {
 
     return (
         <div className="App">
-          <TitleBar />
-            <header className="App-header">
-                <h1>React + Python Desktop App</h1>
-                <p>Data from backend: {data}</p>
-            </header>
+            <TitleBar />
+            <Auth />
+            {/* {data && <p>Данные с сервера: {data}</p>} Отображаем данные, если они есть */}
         </div>
     );
 }
