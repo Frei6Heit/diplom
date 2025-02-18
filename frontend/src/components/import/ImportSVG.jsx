@@ -9,6 +9,11 @@ import { ReactComponent as Voice } from "./icon/voice-circle.svg";
 import { ReactComponent as PhotoProfile } from "./icon/photo-profile.svg";
 import { ReactComponent as Eye } from "./icon/eye.svg";
 import { ReactComponent as EyeOFF } from "./icon/eye-off.svg";
+import { ReactComponent as GoogleIcon } from "./icon/google.svg";
+import { ReactComponent as UnSave } from "./icon/archive-slash.svg";
+import { ReactComponent as Save } from "./icon/archive-tick.svg";
+
+
 
 
 
@@ -27,6 +32,9 @@ const icons = {
     PhotoProfile,
     Eye,
     EyeOFF,
+    GoogleIcon,
+    UnSave,
+    Save,
 };
 
 export default icons;

@@ -1,80 +1,92 @@
-from flask import Flask, jsonify, redirect, url_for, session, request
+from flask import Flask, jsonify, redirect, session, request
 from flask_cors import CORS
 from google_auth import get_flow, get_user_info
+from auth_utils import generate_jwt, decode_jwt, save_remember_me_data
+from dotenv import load_dotenv
 import os
-import datetime
+import jwt
+import requests
 
+# Загрузка переменных окружения из .env файла
+load_dotenv()
+
+# Инициализация Flask приложения
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-app.secret_key = 'YOUR_SECRET_KEY'  # Set a secret key for session management
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type"]}})
 
-# JWT configuration
-app.config['JWT_SECRET'] = 'YOUR_JWT_SECRET'  # Secret key for signing JWTs
+# Настройка секретных ключей
+app.secret_key = os.getenv('FLASK_SECRET_KEY')
+app.config['JWT_SECRET'] = os.getenv('JWT_SECRET_KEY')  # Секретный ключ для подписи JWT
 
-# Allow HTTP for local development (remove in production)
+# Разрешить HTTP для локальной разработки (удалить в продакшене)
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    """
-    Example API endpoint.
-    """
-    return jsonify({"message": "Hello from Python backend!"})
 
+# Маршрут для начала аутентификации через Google
 @app.route('/auth/google')
 def login():
-    """
-    Redirect the user to Google's OAuth2 consent page.
-    """
     flow = get_flow()
     authorization_url, state = flow.authorization_url(
         access_type='offline',
         include_granted_scopes='true'
     )
-    session['state'] = state  # Save the state in the session
-    return redirect(authorization_url)
+    session['state'] = state  # Сохраняем состояние в сессии
+    print(f"State saved: {state}")  # Для отладки
+    return redirect(authorization_url)  # Перенаправляем пользователя на страницу авторизации Google
 
+
+# Маршрут для обработки callback от Google OAuth2
 @app.route('/auth/google/callback')
 def callback():
-    """
-    Handle the callback from Google OAuth2 and generate a JWT.
-    """
-    state = session['state']
+    state = session.get('state')
+    if not state:
+        return jsonify({"error": "State not found in session"}), 400
+
     flow = get_flow()
     flow.fetch_token(authorization_response=request.url)
 
-    # Get user info
+    # Получаем данные пользователя
     credentials = flow.credentials
     user_info = get_user_info(credentials)
 
-    # Generate a JWT
-    token = jwt.encode({
-        'id': user_info['id'],
-        'name': user_info['name'],
-        'email': user_info['email'],
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Token expiration
-    }, app.config['JWT_SECRET'], algorithm='HS256')
+    if not user_info:
+        return jsonify({"error": "Failed to fetch user info from Google"}), 400
 
-    # Redirect to the frontend with the JWT
-    return redirect(f'http://localhost:3000/auth/success?token={token}')
+    # Сохраняем данные пользователя в JSON
+    save_remember_me_data(user_info['email'], True)  # Используем email как username
 
+    # Генерируем JWT
+    token = generate_jwt(user_info)
+
+    # Возвращаем токен и данные пользователя в JSON
+    return jsonify({
+        "token": token,
+        "user_info": user_info,  # Возвращаем данные пользователя
+        "redirect_url": "http://localhost:3000/main",
+        "message": "Google login successful"
+    }), 200
+
+
+# Маршрут для получения информации о пользователе
 @app.route('/auth/user')
 def get_user():
     """
-    Verify the JWT and return user information.
+    Проверяет JWT и возвращает информацию о пользователе.
     """
     token = request.args.get('token')
     if not token:
         return jsonify({"error": "Token is missing"}), 401
 
     try:
-        # Decode the JWT
-        data = jwt.decode(token, app.config['JWT_SECRET'], algorithms=['HS256'])
-        return jsonify(data)
+        # Декодируем JWT
+        user_data = decode_jwt(token)
+        return jsonify(user_data)
     except jwt.ExpiredSignatureError:
         return jsonify({"error": "Token has expired"}), 401
     except jwt.InvalidTokenError:
         return jsonify({"error": "Invalid token"}), 401
 
+
+# Запуск приложения
 if __name__ == '__main__':
     app.run(debug=True)

@@ -5,10 +5,10 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 # Load Google OAuth2 configuration from config.json
-with open('conf_google.json', 'r') as f:
+with open('./data/conf_google.json', 'r') as f:
     config = json.load(f)
 
-CLIENT_SECRETS_FILE = "conf_google.json"
+CLIENT_SECRETS_FILE = "./data/conf_google.json"
 SCOPES = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email', 'openid']
 REDIRECT_URI = config['installed']['redirect_uris'][0]
 
