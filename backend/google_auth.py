@@ -1,31 +1,38 @@
-import json
 from google_auth_oauthlib.flow import Flow
-from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+import os
+from dotenv import load_dotenv
 
-# Load Google OAuth2 configuration from config.json
-with open('./data/conf_google.json', 'r') as f:
-    config = json.load(f)
+# Загрузка переменных окружения
+load_dotenv()
 
-CLIENT_SECRETS_FILE = "./data/conf_google.json"
-SCOPES = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email', 'openid']
-REDIRECT_URI = config['installed']['redirect_uris'][0]
+# Настройки OAuth2
+CLIENT_SECRETS_FILE = "./data/conf_google.json"  # Файл с клиентскими секретами
+SCOPES = [
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email",
+]
+
+REDIRECT_URI = "http://localhost:5000/auth/google/callback"
 
 def get_flow():
     """
-    Create and return a Flow object for Google OAuth2.
+    Создает и возвращает объект Flow для авторизации через Google OAuth 2.0.
     """
-    return Flow.from_client_secrets_file(
+    flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE,
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI
     )
+    return flow
 
-def get_user_info(credentials):
+def get_user_info(token):
     """
-    Fetch user information using the provided credentials.
+    Возвращает информацию о пользователе из Google API.
     """
-    service = build('oauth2', 'v2', credentials=credentials)
+    credentials = Credentials(token['access_token'])
+    service = build("oauth2", "v2", credentials=credentials)
     user_info = service.userinfo().get().execute()
     return user_info

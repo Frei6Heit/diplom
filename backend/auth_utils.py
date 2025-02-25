@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import jwt
 from datetime import datetime, timedelta
+from argon2 import PasswordHasher  # Используем argon2 для хеширования
 
 # Загрузка переменных окружения
 load_dotenv()
@@ -10,10 +11,19 @@ load_dotenv()
 # Секретный ключ для JWT
 JWT_SECRET = os.getenv('JWT_SECRET')
 
+if not JWT_SECRET:
+    raise ValueError("JWT_SECRET is not set in .env file")
+
+# Инициализация PasswordHasher
+ph = PasswordHasher()
+
 def generate_jwt(user_info):
     """
     Генерирует JWT на основе данных пользователя.
     """
+    if not isinstance(JWT_SECRET, str):
+        raise TypeError("JWT_SECRET must be a string")
+
     payload = {
         'user_id': user_info['id'],
         'email': user_info['email'],
@@ -34,18 +44,39 @@ def decode_jwt(token):
     except jwt.InvalidTokenError:
         raise Exception("Invalid token")
 
-def save_remember_me_data(username, remember_me):
+def hash_password(password):
+    """
+    Хеширует пароль с использованием argon2.
+    """
+    return ph.hash(password)
+
+def check_password(input_password, hashed_password):
+    """
+    Проверяет, совпадает ли введенный пароль с хешированным.
+    """
+    try:
+        return ph.verify(hashed_password, input_password)
+    except Exception as e:
+        print(f"Password verification failed: {e}")
+        return False
+
+def save_remember_me_data(username, remember_me, password):
     """
     Сохраняет данные "Remember Me" в JSON-файл.
     """
+    print(f"Saving user data: username={username}, remember_me={remember_me}, password={password}")  # Отладочный вывод
     data = {
         "username": username,
         "remember_me": remember_me,
+        "password": password,
         "timestamp": datetime.now().isoformat()  # Добавляем метку времени
     }
 
     # Путь к файлу
     file_path = "./data/users.json"
+
+    # Убедимся, что директория существует
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     # Чтение существующих данных (если файл существует)
     if os.path.exists(file_path):
@@ -58,7 +89,7 @@ def save_remember_me_data(username, remember_me):
         existing_data = []
 
     # Удаление дубликатов по username
-    existing_data = [d for d in existing_data if d["username"]!= username]
+    existing_data = [d for d in existing_data if d["username"] != username]
     
     # Добавление новых данных
     existing_data.append(data)
