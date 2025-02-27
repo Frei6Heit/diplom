@@ -8,6 +8,7 @@ import os
 import jwt
 import json
 from argon2 import PasswordHasher as ph  # Используем argon2 для хеширования
+from weather_inf import get_weather
 
 # Загрузка переменных окружения
 load_dotenv()
@@ -44,6 +45,15 @@ def save_users(users):
         json.dump(users, file, indent=4)
 
 # Маршруты FLASK ===================================
+
+@app.route('/api/weather', methods=['GET'])
+def weather():
+    city = request.args.get('city', 'Москва')  # По умолчанию Москва
+    weather_data = get_weather(city)
+    
+    print(weather_data)
+    return jsonify(weather_data)
+
 
 @app.route('/auth/user', methods=['GET'])
 def get_user():
