@@ -8,7 +8,7 @@ import os
 import jwt
 import json
 from argon2 import PasswordHasher as ph  # Используем argon2 для хеширования
-from weather_inf import get_weather
+import webbrowser  # Для открытия браузера
 
 # Загрузка переменных окружения
 load_dotenv()
@@ -26,7 +26,6 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Файл с данными о пользователях
 USERS_FILE = "./data/users.json"
-
 
 # Функция загрузки данных пользователей из файла
 def load_users():
@@ -46,15 +45,6 @@ def save_users(users):
 
 # Маршруты FLASK ===================================
 
-@app.route('/api/weather', methods=['GET'])
-def weather():
-    city = request.args.get('city', 'Москва')  # По умолчанию Москва
-    weather_data = get_weather(city)
-    
-    print(weather_data)
-    return jsonify(weather_data)
-
-
 @app.route('/auth/user', methods=['GET'])
 def get_user():
     token = request.headers.get('Authorization')
@@ -72,8 +62,6 @@ def get_user():
     except jwt.InvalidTokenError:
         return jsonify({"error": "Invalid token"}), 401
 
-
-# Маршрут создания аккаунта
 # Маршрут создания аккаунта
 @app.route('/register', methods=['POST'])
 def register():
@@ -108,7 +96,6 @@ def register():
     return jsonify({"message": "Registration successful"}), 201
 
 # Маршрут входа
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -138,9 +125,6 @@ def login():
 # Маршрут авторизации через Google OAuth 2.0
 @app.route('/auth/google', methods=['GET'])
 def google_auth():
-    # flow = get_flow()
-    # authorization_url, state = flow.authorization_url(prompt='consent')
-    # session['state'] = state
     return redirect('http://localhost:3000/main')
 
 # Маршрут обработки callback от Google OAuth 2.0
@@ -180,6 +164,58 @@ def google_callback():
 
     token = generate_jwt({"id": username, "email": email})
     return jsonify({"token": token, "redirect_url": "/main"}), 200
+
+# Маршрут для добавления приложения
+@app.route('/api/add_app', methods=['POST'])
+def add_app():
+    data = request.get_json()
+    print("Received data:", data)  # Проверка полученных данных
+    keyword = data.get('keyword')
+    link = data.get('link')
+
+    if not keyword or not link:
+        return jsonify({"error": "Keyword and link are required"}), 400
+
+    try:
+        # Загрузка JSON-файла
+        with open("./functions/dop_func/trigger.json", "r", encoding="utf-8") as file:
+            commands = json.load(file)
+            print("Current commands:", commands)  # Проверка текущих данных
+
+        # Поиск команды с app_mapping
+        for command in commands:
+            if "app_mapping" in command:
+                # Добавляем новое приложение в app_mapping
+                command["app_mapping"][keyword] = link
+                break
+
+        # Сохранение обновленного JSON-файла
+        with open("./functions/dop_func/trigger.json", "w", encoding="utf-8") as file:
+            json.dump(commands, file, ensure_ascii=False, indent=4)
+            print("Updated commands:", commands)  # Проверка обновленных данных
+
+        return jsonify({"message": f"Приложение '{keyword}' с ссылкой '{link}' успешно добавлено."}), 200
+    except Exception as e:
+        print("Error:", e)  # Логирование ошибки
+        return jsonify({"error": f"Ошибка при добавлении приложения: {e}"}), 500
+
+# Маршрут для обработки поискового запроса
+@app.route('/api/search', methods=['POST'])
+def search():
+    data = request.get_json()
+    query = data.get('query')
+    print('fddfdffdfdfdfd')
+
+    if not query:
+        return jsonify({"error": "Query is required"}), 400
+
+    try:
+        # Здесь можно добавить логику для обработки поискового запроса
+        # Например, открыть браузер с поисковым запросом
+        webbrowser.open(f"https://yandex.ru/search/?text={query}")
+        return jsonify({"message": f"Запрос '{query}' успешно обработан."}), 200
+    except Exception as e:
+        return jsonify({"error": f"Ошибка при обработке запроса: {e}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

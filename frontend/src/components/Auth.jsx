@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import icons from "./import/ImportSVG";
+import Cookies from 'js-cookie';
 import "../styles/Auth.scss";
 
 const Auth = () => {
@@ -8,8 +9,22 @@ const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
     const [errors, setErrors] = useState({ username: "", password: "" });
 
+    
+
     const usernameRef = useRef(null);
     const passwordRef = useRef(null);
+
+    const saveUserToCookies = (username, password) => {
+        Cookies.set('rememberedUser', JSON.stringify({ username, password }), { expires: 7 }); // Сохраняем на 7 дней
+    };
+    
+    const loadUserFromCookies = () => {
+        const rememberedUser = Cookies.get('rememberedUser');
+        if (rememberedUser) {
+            return JSON.parse(rememberedUser);
+        }
+        return null;
+    };
 
     const handleClick = () => {
         setIsClicked(!isClicked);
@@ -25,12 +40,12 @@ const Auth = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         const username = usernameRef.current.value;
         const password = passwordRef.current.value;
-
+    
         setErrors({ username: "", password: "" });
-
+    
         if (!username || !password) {
             setErrors({
                 username: !username ? "Поле обязательно для заполнения" : "",
@@ -38,7 +53,7 @@ const Auth = () => {
             });
             return;
         }
-
+    
         const endpoint = isLogin ? "/login" : "/register";
         try {
             const response = await fetch(`http://localhost:5000${endpoint}`, {
@@ -52,7 +67,7 @@ const Auth = () => {
                     rememberMe: isClicked,
                 }),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 if (errorData.error) {
@@ -64,23 +79,25 @@ const Auth = () => {
                 }
                 throw new Error(errorData.error || "Ошибка при отправке данных на сервер");
             }
-
+    
             const data = await response.json();
             console.log("Ответ от сервера:", data);
-
+    
             if (endpoint === "/register") {
                 alert("Регистрация прошла успешно!");
             }
-
+    
             if (isClicked) {
                 localStorage.setItem("token", data.token);
+                saveUserToCookies(username, password); // Сохраняем данные в cookies
             } else {
                 localStorage.removeItem("token");
+                Cookies.remove('rememberedUser'); // Удаляем данные из cookies, если флажок не активен
             }
-
+    
             usernameRef.current.value = "";
             passwordRef.current.value = "";
-
+    
             if (data.redirect_url) {
                 window.location.href = data.redirect_url;
             }
@@ -88,6 +105,15 @@ const Auth = () => {
             console.error("Ошибка:", error);
         }
     };
+
+    useEffect(() => {
+        const rememberedUser = loadUserFromCookies();
+        if (rememberedUser) {
+            usernameRef.current.value = rememberedUser.username;
+            passwordRef.current.value = rememberedUser.password;
+            setIsClicked(true); // Устанавливаем флажок "Remember Me" в активное состояние
+        }
+    }, []);
 
     return (
         <>
