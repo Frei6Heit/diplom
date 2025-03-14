@@ -12,6 +12,8 @@ import { ReactComponent as EyeOFF } from "./icon/eye-off.svg";
 import { ReactComponent as GoogleIcon } from "./icon/google.svg";
 import { ReactComponent as UnSave } from "./icon/archive-slash.svg";
 import { ReactComponent as Save } from "./icon/archive-tick.svg";
+import { ReactComponent as MicrophoneB } from "./icon/microphoneB.svg";
+
 
 
 
@@ -35,6 +37,7 @@ const icons = {
     GoogleIcon,
     UnSave,
     Save,
+    MicrophoneB,
 };
 
 export default icons;

@@ -1,7 +1,6 @@
 $primary-color: #DD9090;
 $secondary-color: #723A3A;
 
-
 .title-bar {
     display: flex;
     justify-content: space-between;
@@ -11,6 +10,10 @@ $secondary-color: #723A3A;
     color: white;
     -webkit-app-region: drag; // Позволяет перемещать окно
     padding: 0 10px;
+
+    button {
+        background: none;
+    }
 
     * {
         border: none;
@@ -23,73 +26,77 @@ $secondary-color: #723A3A;
     .burger {
         height: 20px;
         margin: 3px 0 8px;
-
         cursor: pointer;
+        -webkit-app-region: no-drag; // Отключаем drag для кликабельного элемента
     }
 
     &-trapezoid {
-            width: 1290px;
-            height: 24px;
+        width: 1290px;
+        height: 24px;
+        padding: 3px 50px;
+        display: flex;
+        justify-content: space-between;
+        background-color: $secondary-color;
+        clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 2% 100%);
+        -webkit-app-region: drag; // Отключаем drag для кликабельного элемента
 
-            padding: 3px 50px;
-
-            display: flex;
-            justify-content: space-between;
-
-            background-color: $secondary-color;
-            clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 2% 100%);
-    
-
-            .microphone, .decoding {
-                margin-right: 30px;
-                border-right: 2px solid $primary-color;
-                padding: 3px 30px 3px 0;
-
-                width: 70px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 15px;
-                gap: 20px;
-            }
-
-        
+        a { 
+            -webkit-app-region: no-drag;
         }
-
-        &-content-left {
+        .microphone, .decoding {
+            margin-right: 30px;
+            border-right: 2px solid $primary-color;
+            padding: 3px 30px 3px 0;
+            width: 90px;
             display: flex;
-        }
-
-        &-content-right {
-            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 15px;
             gap: 20px;
-        }
+             // Отключаем drag для кликабельного элемента
 
-
-        // button
-        &-controls {
-            display: flex;
-            gap: 10px;
-            height: 20px;
-            -webkit-app-region: no-drag; // Отключает перемещение для кнопок
-
-            button {
-                background: none;
-                border-radius: 50%;
-                cursor: pointer;
-                width: 20px;
-            }
-
-            .curtail {
-                background-color: #4FBD34;
-            }
-
-            .minimize {
-                background-color: #E7D947;
-            }
-
-            .close {
-                background-color: #F24141;
+            .mic {
+                height: 24px;
             }
         }
     }
+
+    &-content-left {
+        display: flex;
+        align-items: center;
+    }
+
+    &-content-right {
+        display: flex;
+        gap: 20px;
+        -webkit-app-region: no-drag; // Отключаем drag для кликабельного элемента
+    }
+
+    // button
+    &-controls {
+        display: flex;
+        gap: 10px;
+        height: 20px;
+        -webkit-app-region: no-drag; // Отключаем drag для кликабельного элемента
+
+        button {
+            background: none;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 20px;
+            -webkit-app-region: no-drag; // Отключаем drag для кликабельного элемента
+        }
+
+        .curtail {
+            background-color: #4FBD34;
+        }
+
+        .minimize {
+            background-color: #E7D947;
+        }
+
+        .close {
+            background-color: #F24141;
+        }
+    }
+}

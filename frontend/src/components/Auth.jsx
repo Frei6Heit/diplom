@@ -84,7 +84,7 @@ const Auth = () => {
             console.log("Ответ от сервера:", data);
     
             if (endpoint === "/register") {
-                alert("Регистрация прошла успешно!");
+                // alert("Регистрация прошла успешно!");
             }
     
             if (isClicked) {

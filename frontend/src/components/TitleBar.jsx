@@ -9,52 +9,63 @@ const TitleBar = () => {
     const [isSettingsOpen, setSettingsOpen] = useState(false);
 
     const toggleMenu = () => {
+        console.log("Toggle Menu"); // Отладка
         setMenuOpen(!isMenuOpen);
-    };
-
-    const toggleSettings = () => {
-        setSettingsOpen(!isSettingsOpen);
     };
 
     return (
         <div className="title-bar">
-            <div className="burger" onClick={toggleMenu}>
+            <button className="burger" onClick={toggleMenu}>
                 <icons.Menu />
-            </div>
+            </button>
 
             {isMenuOpen && <Burger />} {/* Отображаем меню, если isMenuOpen равно true */}
 
             <div className="title-bar-trapezoid">
                 <div className="title-bar-content-left">
                     <div className="microphone">
-                        <icons.Microphone />
-                        <icons.MicrophoneSl />
+                        <a className="mic">
+                            <icons.Microphone />
+                        </a>
+                        <icons.MicrophoneSl /> {/* Эта иконка не кликабельна */}
+
                     </div>
 
                     <div className="decoding">
-                        <icons.Video />
-                        <icons.Voice />
+                        <a href="/decoding" className="mic">
+                            <icons.Video />
+                        </a>
+                        <button>
+                            <icons.Voice />
+                        </button>
                     </div>
 
-                    <div className="message">
-                        <icons.Message />
+                    <div className="message"> 
+                        <a href="/assistant" className="mic">
+                            <icons.Message />
+                        </a>
                     </div>
                 </div>
 
                 <div className="title-bar-content-right">
-                    <icons.Home />
-                    <div onClick={toggleSettings}>
+                    <a href="/main">
+                        <icons.Home />
+                    </a>
+                    <a href="/settings">
                         <icons.Settings />
-                    </div>
+                    </a>
                 </div>
             </div>
 
             {isSettingsOpen && <Settings />} {/* Отображаем настройки, если isSettingsOpen равно true */}
 
             <div className="title-bar-controls">
-                <button className="curtail" onClick={() => window.electron.minimize()} />
-                <button className="minimize" onClick={() => window.electron.maximize()} />
-                <button className="close" onClick={() => window.electron.close()} />
+                <button className="curtail" onClick={() => window.electron?.minimize()}>
+                </button>
+                <button className="minimize" onClick={() => window.electron?.maximize()}>
+                </button>
+                <button className="close" onClick={() => window.electron?.close()}>
+                </button>
             </div>
         </div>
     );
