@@ -9,6 +9,7 @@ import jwt
 import json
 from argon2 import PasswordHasher as ph  # Используем argon2 для хеширования
 import webbrowser  # Для открытия браузера
+import speech_recognition as sr
 
 # Загрузка переменных окружения
 load_dotenv()
@@ -217,5 +218,36 @@ def search():
     except Exception as e:
         return jsonify({"error": f"Ошибка при обработке запроса: {e}"}), 500
 
+@app.route('/api/recognize', methods=['POST'])
+def recognize_audio():
+    # Проверяем, есть ли файл в запросе
+    if 'audio' not in request.files:
+        return jsonify({"error": "No audio file provided"}), 400
+
+    audio_file = request.files['audio']
+
+    # Сохраняем файл временно
+    temp_audio_path = "temp_audio.wav"
+    audio_file.save(temp_audio_path)
+
+    # Используем SpeechRecognition для распознавания речи
+    recognizer = sr.Recognizer()
+    try:
+        with sr.AudioFile(temp_audio_path) as source:
+            audio_data = recognizer.record(source)
+            text = recognizer.recognize_google(audio_data, language="ru-RU")
+        
+        # Удаляем временный файл
+        os.remove(temp_audio_path)
+
+        return jsonify({"text": text}), 200
+    except sr.UnknownValueError:
+        return jsonify({"error": "Speech not recognized"}), 400
+    except sr.RequestError as e:
+        return jsonify({"error": f"Could not request results from Google Speech Recognition service; {e}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"}), 500
+    
+    
 if __name__ == '__main__':
     app.run(debug=True)

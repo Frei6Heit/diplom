@@ -13,13 +13,9 @@ import { ReactComponent as GoogleIcon } from "./icon/google.svg";
 import { ReactComponent as UnSave } from "./icon/archive-slash.svg";
 import { ReactComponent as Save } from "./icon/archive-tick.svg";
 import { ReactComponent as MicrophoneB } from "./icon/microphoneB.svg";
-
-
-
-
-
-
-
+import { ReactComponent as GoogleBcg } from "./icon/google-bcg.svg";
+import { ReactComponent as Enter } from "./icon/enter.svg";
+import { ReactComponent as ListItem } from "./icon/item-list.svg";
 
 
 const icons = {
@@ -38,6 +34,9 @@ const icons = {
     UnSave,
     Save,
     MicrophoneB,
+    GoogleBcg,
+    Enter,
+    ListItem,
 };
 
 export default icons;

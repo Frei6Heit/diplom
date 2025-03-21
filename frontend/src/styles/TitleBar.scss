@@ -6,6 +6,12 @@ $secondary-color: #723A3A;
     justify-content: space-between;
     align-items: center;
     height: 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
     background-color: $primary-color;
     color: white;
     -webkit-app-region: drag; // Позволяет перемещать окно
@@ -27,7 +33,7 @@ $secondary-color: #723A3A;
         height: 20px;
         margin: 3px 0 8px;
         cursor: pointer;
-        -webkit-app-region: no-drag; // Отключаем drag для кликабельного элемента
+        -webkit-app-region: no-drag !important; // Отключаем drag для кликабельного элемента
     }
 
     &-trapezoid {
