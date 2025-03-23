@@ -10,6 +10,11 @@ $secondary-color: #723A3A;
     color: white;
     -webkit-app-region: drag; // Позволяет перемещать окно
     padding: 0 10px;
+    position: fixed;
+    width: 100%; // Изменено на 100%
+    top: 0;
+    z-index: 1000; // Убедимся, что TitleBar всегда сверху
+
 
     button {
         background: none;
@@ -40,10 +45,12 @@ $secondary-color: #723A3A;
         clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 2% 100%);
         -webkit-app-region: drag; // Отключаем drag для кликабельного элемента
 
-        a { 
+        a {
             -webkit-app-region: no-drag;
         }
-        .microphone, .decoding {
+
+        .microphone,
+        .decoding {
             margin-right: 30px;
             border-right: 2px solid $primary-color;
             padding: 3px 30px 3px 0;
@@ -53,7 +60,7 @@ $secondary-color: #723A3A;
             align-items: center;
             height: 15px;
             gap: 20px;
-             // Отключаем drag для кликабельного элемента
+            // Отключаем drag для кликабельного элемента
 
             .mic {
                 height: 24px;

@@ -13,6 +13,12 @@ import { ReactComponent as GoogleIcon } from "./icon/google.svg";
 import { ReactComponent as UnSave } from "./icon/archive-slash.svg";
 import { ReactComponent as Save } from "./icon/archive-tick.svg";
 import { ReactComponent as MicrophoneB } from "./icon/microphoneB.svg";
+import { ReactComponent as ItemList } from "./icon/item-list.svg";
+import { ReactComponent as FavHeart } from "./icon/fav-heart.svg";
+import { ReactComponent as NonFavHeart } from "./icon/non-fav-heart.svg";
+
+
+
 
 
 
@@ -38,6 +44,9 @@ const icons = {
     UnSave,
     Save,
     MicrophoneB,
+    ItemList,
+    FavHeart,
+    NonFavHeart,
 };
 
 export default icons;
