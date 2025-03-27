@@ -2,6 +2,8 @@ $primary-color: #DD9090;
 $secondary-color: #723A3A;
 
 .title-bar {
+    overflow: hidden !important;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -9,11 +11,14 @@ $secondary-color: #723A3A;
     background-color: $primary-color;
     color: white;
     -webkit-app-region: drag; // Позволяет перемещать окно
+    width: 99%; // Изменено на 100%
     padding: 0 10px;
     position: fixed;
-    width: 100%; // Изменено на 100%
-    top: 0;
-    z-index: 1000; // Убедимся, что TitleBar всегда сверху
+    // top: 0;
+    right: 0;
+    // left: 0;
+    // bottom: 0;
+    z-index: 2000; // Убедимся, что TitleBar всегда сверху
 
 
     button {
