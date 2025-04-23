@@ -1,0 +1,155 @@
+.parallax-container {
+    // Цветовые переменные (будут доступны только внутри этого блока)
+    $black: #000000;
+    $ash-black: #222;
+    $white: #fafafa;
+    $sky: #00ccff;
+    $green: #22dddd;
+    $blue: #1300ff;
+    $dusk: #6600ff;
+    $purple: #9900ff;
+    $pink: #ff0066;
+    $red: #fe0222;
+    $orange: #fd7702;
+    $yellow: #ffbb00;
+
+    $background: $purple;
+    $accent: $white;
+
+    // Основные стили компонента
+    background-color: $background;
+    color: $accent;
+    margin: 0;
+    padding: 0;
+
+    * {
+        font-family: "Chango", serif;
+        font-style: normal;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3 {
+        font-family: sofia-pro, sans-serif;
+        font-weight: bold;
+        font-style: normal;
+    }
+
+    h1 {
+        font-size: 56px;
+        font-weight: 600;
+        letter-spacing: -3px;
+        line-height: 1.2;
+        text-align: center;
+        margin: 100px 0;
+    }
+
+    h2 {
+        // margin: 0;
+        // color: $accent;
+        // left: 200px;
+        // font-size: 56px;
+        // font-weight: 600;
+        // letter-spacing: -3px;
+        // line-height: 1.2;
+        // position: absolute;
+    }
+
+    section {
+        padding-top: 85vh;
+        padding-bottom: 85vh;
+        position: relative;
+    }
+
+    .progress {
+        position: fixed;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: $accent;
+        bottom: 100px;
+    }
+
+    // Стили для parallax-эффекта
+    .parallax {
+        overflow: hidden;
+        letter-spacing: -2px;
+        line-height: 0.8;
+        margin: 0;
+        white-space: nowrap;
+        display: flex;
+        flex-wrap: nowrap;
+
+        .scroller {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 64px;
+            display: flex;
+            white-space: nowrap;
+            flex-wrap: nowrap;
+        }
+
+        span {
+            display: block;
+            margin-right: 30px;
+        }
+    }
+
+    // Стили для футера
+    footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 20px;
+        background-image: radial-gradient(rgba(0, 0, 0, 0) 1px,
+                $background 1px);
+        background-size: 4px 4px;
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        -moz-backdrop-filter: blur(3px);
+        font-size: 14px;
+        line-height: 14px;
+
+        &::before {
+            display: block;
+            content: "";
+            position: absolute;
+            top: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: $accent;
+            opacity: 0.2;
+        }
+
+        svg {
+            margin-right: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: $accent;
+        }
+    }
+
+    // Стили скроллбара (только для этого компонента)
+    &::-webkit-scrollbar {
+        height: 5px;
+        width: 5px;
+        background: $background;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $accent;
+        -webkit-border-radius: 1ex;
+    }
+
+    &::-webkit-scrollbar-corner {
+        background: $background;
+    }
+}

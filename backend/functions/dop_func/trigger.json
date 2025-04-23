@@ -1,0 +1,39 @@
+[
+    {
+        "type": "app",
+        "trigger": [
+            "Открой",
+            "Запусти"
+        ],
+        "response": "Открываю",
+        "func": "open_app",
+        "app_mapping": {
+            "калькулятор": "calc",
+            "блокнот": "notepad",
+            "проводник": "explorer",
+            "музыка": "\"C:\\Users\\Ана\\AppData\\Local\\Programs\\YandexMusic\\Яндекс Музыка.exe\""
+        },
+        "website_mapping": {
+            "гугл": "https://www.google.com",
+            "ютуб": "https://www.youtube.com",
+            "википедия": "https://www.wikipedia.org"
+        }
+    },
+    {
+        "type": "add_app",
+        "trigger": [
+            "Добавь приложение"
+        ],
+        "response": "Приложение добавлено",
+        "func": "add_app"
+    },
+    {
+        "type": "video",
+        "trigger": [
+            "Включи",
+            "включи"
+        ],
+        "response": "Ищу видео",
+        "func": "play_video"
+    }
+]
