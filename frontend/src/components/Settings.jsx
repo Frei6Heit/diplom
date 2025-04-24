@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { debounce } from "lodash";
 import "../styles/Settings.scss";
@@ -326,7 +327,6 @@ const titleBarIcons = [
             </div>
         </div>
         </>
-    );
-};
+    )}
 
 export default Settings;

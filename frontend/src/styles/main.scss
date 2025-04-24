@@ -1,3 +1,4 @@
+
 $primary-color: #DD9090;
 $secondary-color: #723A3A;
 $main-font: "Chango", serif;
@@ -29,4 +30,10 @@ $main-font: "Chango", serif;
     &::-webkit-scrollbar-thumb:hover {
         background-color: $primary-color;
     }
+}
+
+body {
+    // padding-top: 30px;
+    overflow: hidden;
+    padding: 10px;
 }

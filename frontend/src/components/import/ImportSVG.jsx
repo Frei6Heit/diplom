@@ -21,13 +21,9 @@ import { ReactComponent as LogOut} from "./icon/logout.svg";
 
 
 
-
-
-
-
-
-
-
+import { ReactComponent as GoogleBcg } from "./icon/google-bcg.svg";
+import { ReactComponent as Enter } from "./icon/enter.svg";
+import { ReactComponent as ListItem } from "./icon/item-list.svg";
 
 
 const icons = {
@@ -51,6 +47,9 @@ const icons = {
     NonFavHeart,
     Pattern,
     LogOut,
+    GoogleBcg,
+    Enter,
+    ListItem,
 };
 
 export default icons;
