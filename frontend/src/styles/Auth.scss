@@ -5,7 +5,6 @@ $t-l-color: #237E3F;
 $main-font: "Chango", serif;
 
 
-
 .bkg {
     font-family: $main-font;
     background-image: url('../components/import/icon/main_backround.svg');
@@ -20,6 +19,9 @@ $main-font: "Chango", serif;
     justify-content: center;
     align-items: center;
 
+    left: 0;
+
+    margin: -60px 0 0 0;
     margin: 0;
 
     &-l {
@@ -198,6 +200,10 @@ $main-font: "Chango", serif;
         width: 200px;
         justify-content: space-between;
         color: $f-s-color;
+
+        p {
+            margin: 0;
+        }
     }
 
     
@@ -232,7 +238,7 @@ $main-font: "Chango", serif;
         }
 
         p {
-            margin-top: 2px;
+            margin: 2px 0 0 0;
         }
 
     }

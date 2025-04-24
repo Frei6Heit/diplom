@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@motionone/utils": "^10.18.0",
     "cra-template": "1.2.0",
+    "framer-motion": "^12.6.2",
     "js-cookie": "^3.0.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.5",
+    "react-router-dom": "^6.30.0",
     "react-scripts": "5.0.1",
+    "react-toastify": "^11.0.5",
     "sass": "^1.84.0",
     "web-vitals": "^4.2.4"
   },

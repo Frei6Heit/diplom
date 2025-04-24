@@ -70,5 +70,4 @@ const TitleBar = () => {
         </div>
     );
 };
-
 export default TitleBar;

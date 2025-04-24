@@ -2,10 +2,23 @@ $primary-color: #DD9090;
 $secondary-color: #723A3A;
 
 .title-bar {
+
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 30px;
+    background-color: $primary-color;
+    color: white;
+    -webkit-app-region: drag; // Позволяет перемещать окно
+    width: 99%; // Изменено на 100%
+    padding: 0 30px 0 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    // bottom: 0;
+    z-index: 2000; // Убедимся, что TitleBar всегда сверху
+
     position: fixed;
     top: 0;
     left: 0;
@@ -46,9 +59,10 @@ $secondary-color: #723A3A;
         clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 2% 100%);
         -webkit-app-region: drag; // Отключаем drag для кликабельного элемента
 
-        a { 
+        a {
             -webkit-app-region: no-drag;
         }
+
         .microphone, .decoding {
             margin-right: 30px;
             border-right: 2px solid $primary-color;
@@ -59,7 +73,6 @@ $secondary-color: #723A3A;
             align-items: center;
             height: 15px;
             gap: 20px;
-             // Отключаем drag для кликабельного элемента
 
             .mic {
                 height: 24px;

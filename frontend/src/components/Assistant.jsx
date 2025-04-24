@@ -6,7 +6,7 @@ const Assistant = () => {
     const searchText = location.state?.searchText || "";
 
     return (
-        <div>
+        <div className="content-block-date">
             <h1>Assistant Page</h1>
             <input type="text" value={searchText} readOnly />
         </div>

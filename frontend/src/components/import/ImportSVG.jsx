@@ -13,6 +13,14 @@ import { ReactComponent as GoogleIcon } from "./icon/google.svg";
 import { ReactComponent as UnSave } from "./icon/archive-slash.svg";
 import { ReactComponent as Save } from "./icon/archive-tick.svg";
 import { ReactComponent as MicrophoneB } from "./icon/microphoneB.svg";
+import { ReactComponent as ItemList } from "./icon/item-list.svg";
+import { ReactComponent as FavHeart } from "./icon/fav-heart.svg";
+import { ReactComponent as NonFavHeart } from "./icon/non-fav-heart.svg";
+import { ReactComponent as Pattern} from "./icon/pattern.svg";
+import { ReactComponent as LogOut} from "./icon/logout.svg";
+
+
+
 import { ReactComponent as GoogleBcg } from "./icon/google-bcg.svg";
 import { ReactComponent as Enter } from "./icon/enter.svg";
 import { ReactComponent as ListItem } from "./icon/item-list.svg";
@@ -34,6 +42,11 @@ const icons = {
     UnSave,
     Save,
     MicrophoneB,
+    ItemList,
+    FavHeart,
+    NonFavHeart,
+    Pattern,
+    LogOut,
     GoogleBcg,
     Enter,
     ListItem,
