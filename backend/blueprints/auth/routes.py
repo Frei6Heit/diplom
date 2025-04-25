@@ -321,3 +321,148 @@ def get_user_token():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+@auth_bp.route('/save_settings', methods=['POST'])
+@swag_from({
+    'tags': ['Auth'],
+    'description': 'Сохранение настроек пользователя',
+    'parameters': [
+        {
+            'name': 'Authorization',
+            'in': 'header',
+            'type': 'string',
+            'required': True,
+            'description': 'Bearer token'
+        },
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'theme': {'type': 'string'},
+                    'colors': {'type': 'object'},
+                    'title_bar': {'type': 'object'},
+                    'api_settings': {'type': 'object'}
+                },
+                'required': ['theme']
+            }
+        }
+    ],
+    'responses': {
+        200: {'description': 'Настройки успешно сохранены'},
+        401: {'description': 'Невалидный токен'},
+        404: {'description': 'Пользователь не найден'},
+        500: {'description': 'Ошибка сервера'}
+    }
+})
+def save_settings():
+    # Проверка токена
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({"error": "Token is missing"}), 401
+
+    try:
+        token = token.split(" ")[1]
+        user_data = decode_jwt(token)
+        username = user_data.get('id')
+        
+        settings_data = request.get_json()
+        
+        # Загружаем текущих пользователей
+        users = load_users()
+        
+        # Находим текущего пользователя
+        user_index = next((i for i, u in enumerate(users) if u["username"] == username), None)
+        if user_index is None:
+            return jsonify({"error": "User not found"}), 404
+            
+        # Обновляем настройки пользователя
+        if 'settings' not in users[user_index]:
+            users[user_index]['settings'] = {}
+            
+        # Сохраняем тему
+        if 'theme' in settings_data:
+            users[user_index]['settings']['theme'] = settings_data['theme']
+            
+        # Сохраняем цвета
+        if 'colors' in settings_data:
+            users[user_index]['settings']['colors'] = settings_data['colors']
+            
+        # Сохраняем настройки title bar
+        if 'title_bar' in settings_data:
+            users[user_index]['settings']['title_bar'] = settings_data['title_bar']
+            
+        # Сохраняем API настройки
+        if 'api_settings' in settings_data:
+            users[user_index]['settings']['api_settings'] = settings_data['api_settings']
+        
+        # Добавляем timestamp обновления
+        users[user_index]['settings']['last_updated'] = datetime.now().isoformat()
+        
+        # Сохраняем обновленных пользователей
+        save_users(users)
+        
+        return jsonify({"message": "Settings saved successfully"}), 200
+        
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@auth_bp.route('/get_settings', methods=['GET'])
+@swag_from({
+    'tags': ['Auth'],
+    'description': 'Получение настроек пользователя',
+    'parameters': [
+        {
+            'name': 'Authorization',
+            'in': 'header',
+            'type': 'string',
+            'required': True,
+            'description': 'Bearer token'
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'Настройки пользователя',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'settings': {'type': 'object'}
+                }
+            }
+        },
+        401: {'description': 'Невалидный токен'},
+        404: {'description': 'Пользователь не найден'}
+    }
+})
+def get_settings():
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({"error": "Token is missing"}), 401
+
+    try:
+        token = token.split(" ")[1]
+        user_data = decode_jwt(token)
+        username = user_data.get('id')
+        
+        users = load_users()
+        user = next((u for u in users if u["username"] == username), None)
+        
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+            
+        settings = user.get('settings', {})
+        
+        return jsonify({"settings": settings}), 200
+        
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401

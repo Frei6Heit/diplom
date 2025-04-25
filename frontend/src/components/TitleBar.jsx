@@ -32,7 +32,7 @@ const TitleBar = () => {
                     </div>
 
                     <div className="decoding">
-                        <a href="/decoding" className="mic">
+                        <a href="/account" className="mic">
                             <icons.Video />
                         </a>
                         <button>
@@ -70,4 +70,5 @@ const TitleBar = () => {
         </div>
     );
 };
+
 export default TitleBar;

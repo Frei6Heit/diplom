@@ -1,35 +1,50 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { debounce } from "lodash";
 import "../styles/Settings.scss";
 import NavSettings from "../components/dop_func/NavSettings.jsx";
 
 const titleBarIcons = [
-    { id: 1, name: "microphone"},
-    { id: 2, name: "voice assistant"},
-    { id: 3, name: "text assistant"},
-    { id: 4, name: "decoding"},
-    { id: 5, name: "account"},
-    { id: 6, name: "settings"},
-    { id: 7, name: "main page"},
-    { id: 8, name: "device control"},
-    { id: 9, name: "search info"},
-    { id: 10, name: "VPN"},
+    { id: 1, name: "microphone" },
+    { id: 2, name: "voice assistant" },
+    { id: 3, name: "text assistant" },
+    { id: 4, name: "decoding" },
+    { id: 5, name: "account" },
+    { id: 6, name: "settings" },
+    { id: 7, name: "main page" },
+    { id: 8, name: "device control" },
+    { id: 9, name: "search info" },
+    { id: 10, name: "VPN" }
+];
 
-    ];
+const colorVariables = [
+    { name: 'primary-color', label: 'Primary Color' },
+    { name: 'secondary-color', label: 'Secondary Color' },
+    { name: 'background-color', label: 'Background' },
+    { name: 'border-color', label: 'Border' },
+    { name: 'button-color', label: 'Button' },
+    { name: 'text-color', label: 'Text' },
+    { name: 'contrast-text-color', label: 'Contrast Text' },
+    { name: 'card-background', label: 'Card Background' },
+    { name: 'shadow-color', label: 'Shadow' },
+    { name: 'warning-background', label: 'Warning BG' },
+    { name: 'warning-text', label: 'Warning Text' },
+    { name: 'input-border', label: 'Input Border' },
+    { name: 'input-background', label: 'Input BG' },
+    { name: 'preview-border', label: 'Preview Border' },
+    { name: 'section-background', label: 'Section BG' }
+];
 
-    const Settings = () => {
+const Settings = () => {
     // Theme states
     const [theme, setTheme] = useState(
-        () => localStorage.getItem("selectedTheme") || ""
+        () => localStorage.getItem("selectedTheme") || "white"
     );
-    const [colors, setColors] = useState(() => ({
-        primary: localStorage.getItem("primaryColor") || "#DD9090",
-        secondary: localStorage.getItem("secondaryColor") || "#723A3A",
-    }));
-    const [showColorPicker, setShowColorPicker] = useState(false);
     const [contrastWarning, setContrastWarning] = useState(false);
-    const [showPreview, setShowPreview] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [saveMessage, setSaveMessage] = useState("");
+    
+    const showColorPicker = theme === "custom";
+    const showPreview = theme === "custom";
 
     // Title bar states
     const [titleBarType, setTitleBarType] = useState(
@@ -47,6 +62,16 @@ const titleBarIcons = [
         textCorrection: localStorage.getItem("api_text_correction") || "",
     });
 
+    // All colors from :root
+    const [allColors, setAllColors] = useState(() => {
+        const initialColors = {};
+        colorVariables.forEach(variable => {
+            initialColors[variable.name] = localStorage.getItem(variable.name) || 
+                getComputedStyle(document.documentElement).getPropertyValue(`--${variable.name}`).trim();
+        });
+        return initialColors;
+    });
+
     // Helper functions
     const getContrastColor = (hexColor) => {
         const r = parseInt(hexColor.substr(1, 2), 16);
@@ -58,61 +83,126 @@ const titleBarIcons = [
 
     const checkContrast = useCallback((primary, secondary) => {
         const getLuminance = (hex) => {
-        const rgb = parseInt(hex.substring(1), 16);
-        const r = (rgb >> 16) & 0xff;
-        const g = (rgb >> 8) & 0xff;
-        const b = (rgb >> 0) & 0xff;
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            const rgb = parseInt(hex.substring(1), 16);
+            const r = (rgb >> 16) & 0xff;
+            const g = (rgb >> 8) & 0xff;
+            const b = (rgb >> 0) & 0xff;
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
         };
         return Math.abs(getLuminance(primary) - getLuminance(secondary)) < 120;
     }, []);
 
     const updateColors = useCallback(
         debounce((newColors) => {
-        document.documentElement.style.setProperty(
-            "--primary-color",
-            newColors.primary
-        );
-        document.documentElement.style.setProperty(
-            "--secondary-color",
-            newColors.secondary
-        );
-        setContrastWarning(checkContrast(newColors.primary, newColors.secondary));
+            colorVariables.forEach(variable => {
+                document.documentElement.style.setProperty(
+                    `--${variable.name}`,
+                    newColors[variable.name]
+                );
+            });
+            setContrastWarning(checkContrast(
+                newColors['primary-color'],
+                newColors['secondary-color']
+            ));
         }, 300),
         []
     );
 
-    // Handlers
+    // Save all settings function
+    const saveAllSettings = () => {
+        // Save theme
+        localStorage.setItem("selectedTheme", theme);
+        
+        // Save colors if custom theme
+        if (theme === "custom") {
+            colorVariables.forEach(variable => {
+                localStorage.setItem(variable.name, allColors[variable.name]);
+            });
+        }
+        
+        // Save title bar settings
+        localStorage.setItem("titleBarType", titleBarType);
+        if (titleBarType === "custom") {
+            localStorage.setItem("selectedIcon", selectedIcon);
+        }
+        
+        // Save API settings
+        Object.keys(apiSettings).forEach(key => {
+            localStorage.setItem(`api_${key}`, apiSettings[key]);
+        });
+        
+        setSaveMessage("All settings saved successfully!");
+        setHasUnsavedChanges(false);
+        
+        setTimeout(() => {
+            setSaveMessage("");
+        }, 3000);
+    };
+
+    // Handlers that mark changes as unsaved
+    const markUnsaved = () => setHasUnsavedChanges(true);
+
     const handleApiChange = (field, value) => {
         const newSettings = { ...apiSettings, [field]: value };
         setApiSettings(newSettings);
-        localStorage.setItem(`api_${field}`, value);
+        markUnsaved();
     };
 
     const handleThemeSelect = (selectedTheme) => {
-        const isCustom = selectedTheme === "custom";
-        const newTheme = theme === selectedTheme ? "" : selectedTheme;
-
-        setTheme(newTheme);
-        setShowColorPicker(isCustom && newTheme === "custom");
-        setShowPreview(isCustom && newTheme === "custom");
-
-        if (newTheme) localStorage.setItem("selectedTheme", newTheme);
-        else localStorage.removeItem("selectedTheme");
+        if (theme === selectedTheme) return;
+        
+        setTheme(selectedTheme);
+        markUnsaved();
 
         if (selectedTheme === "white") {
-        handleColorChange("primary", "#DD9090");
-        handleColorChange("secondary", "#723A3A");
+            const whiteThemeColors = {
+                'primary-color': '#DD9090',
+                'secondary-color': '#723A3A',
+                'background-color': 'white',
+                'border-color': 'black',
+                'button-color': '#237E3F',
+                'text-color': '#333',
+                'contrast-text-color': 'white',
+                'card-background': 'white',
+                'shadow-color': 'rgba(0, 0, 0, 0.1)',
+                'warning-background': '#fff3cd',
+                'warning-text': '#856404',
+                'input-border': 'black',
+                'input-background': 'white',
+                'preview-border': '#ddd',
+                'section-background': '#f5f5f5'
+            };
+            setAllColors(whiteThemeColors);
+            updateColors(whiteThemeColors);
         } else if (selectedTheme === "black") {
-        handleColorChange("primary", "#333333");
-        handleColorChange("secondary", "#000000");
+            const blackThemeColors = {
+                'primary-color': '#333333',
+                'secondary-color': '#DD9090',
+                'background-color': 'black',
+                'border-color': '#444',
+                'button-color': '#237E3F',
+                'text-color': 'white',
+                'contrast-text-color': '#000',
+                'card-background': '#222',
+                'shadow-color': 'rgba(255, 255, 255, 0.1)',
+                'warning-background': '#333',
+                'warning-text': '#ffcc00',
+                'input-border': '#444',
+                'input-background': '#222',
+                'preview-border': '#444',
+                'section-background': '#1a1a1a'
+            };
+            setAllColors(blackThemeColors);
+            updateColors(blackThemeColors);
+        } else if (selectedTheme === "custom") {
+            updateColors(allColors);
         }
     };
 
-    const handleColorChange = (type, value) => {
-        const newColors = { ...colors, [type]: value };
-        setColors(newColors);
-        localStorage.setItem(`${type}Color`, value);
+    const handleColorChange = (variableName, value) => {
+        const newColors = { ...allColors, [variableName]: value };
+        setAllColors(newColors);
+        markUnsaved();
         updateColors(newColors);
     };
 
@@ -122,211 +212,241 @@ const titleBarIcons = [
 
         setTitleBarType(newType);
         setShowTitleBarPicker(isCustom && newType === "custom");
-
-        if (newType === "custom") localStorage.setItem("titleBarType", newType);
-        else localStorage.removeItem("titleBarType");
+        markUnsaved();
     };
 
     const handleIconSelect = (iconId) => {
         setSelectedIcon(iconId);
-        localStorage.setItem("selectedIcon", iconId);
+        markUnsaved();
     };
 
     // Effects
     useEffect(() => {
-        updateColors(colors);
-        setContrastWarning(checkContrast(colors.primary, colors.secondary));
-        setShowPreview(theme === "custom");
-        return () => updateColors.cancel();
-    }, [colors, theme, updateColors, checkContrast]);
+        // Initialize all colors on load
+        colorVariables.forEach(variable => {
+            const storedValue = localStorage.getItem(variable.name);
+            if (storedValue) {
+                document.documentElement.style.setProperty(`--${variable.name}`, storedValue);
+            }
+        });
+        
+        // Check contrast for current colors
+        setContrastWarning(checkContrast(
+            allColors['primary-color'],
+            allColors['secondary-color']
+        ));
+    }, []);
 
     // Render helpers
     const renderApiInput = (label, field) => (
         <div className="items">
-        <div className="items-it">
-            <p>{label}</p>
-            <div className="items-blc">
-            <input
-                placeholder="insert"
-                value={apiSettings[field]}
-                onChange={(e) => handleApiChange(field, e.target.value)}
-            />
-            <button value="link">link</button>
+            <div className="items-it">
+                <p>{label}</p>
+                <div className="items-blc">
+                    <input
+                        placeholder="insert"
+                        value={apiSettings[field]}
+                        onChange={(e) => handleApiChange(field, e.target.value)}
+                    />
+                    <button value="link">link</button>
+                </div>
             </div>
-        </div>
         </div>
     );
 
     const renderThemeButton = (type, label) => (
         <button
-        className={theme === type ? "active" : ""}
-        onClick={() => handleThemeSelect(type)}
+            className={theme === type ? "active" : ""}
+            onClick={() => handleThemeSelect(type)}
         >
-        {label}
+            {label}
         </button>
     );
 
-    const renderColorPicker = (type, label) => (
-        <div className="color-input-group">
-        <input
-            type="color"
-            value={colors[type]}
-            onChange={(e) => handleColorChange(type, e.target.value)}
-            aria-label={`Select ${label} color`}
-        />
-        <input
-            value={colors[type]}
-            className="color-input"
-            onChange={(e) => handleColorChange(type, e.target.value)}
-        />
-        <label>{label}</label>
+    const renderColorPickers = () => (
+        <div className="color-inputs-grid">
+            {colorVariables.map(variable => (
+                <div key={variable.name} className="color-input-group">
+                    <input
+                        type="color"
+                        value={allColors[variable.name]}
+                        onChange={(e) => handleColorChange(variable.name, e.target.value)}
+                        aria-label={`Select ${variable.label} color`}
+                    />
+                    <input
+                        value={allColors[variable.name]}
+                        className="color-input"
+                        onChange={(e) => handleColorChange(variable.name, e.target.value)}
+                    />
+                    <label>{variable.label}</label>
+                </div>
+            ))}
         </div>
     );
 
-    const renderIconOption = ({ id, icon, name }) => (
+    const renderIconOption = ({ id, name }) => (
         <div
-        key={id}
-        className={`icon-option ${selectedIcon == id ? "selected" : ""}`}
-        onClick={() => handleIconSelect(id)}
+            key={id}
+            className={`icon-option ${selectedIcon == id ? "selected" : ""}`}
+            onClick={() => handleIconSelect(id)}
         >
-        <span className="icon">{icon}</span>
-        <span>{name}</span>
+            <span>{name}</span>
+            {selectedIcon == id && <span className="checkmark">✓</span>}
         </div>
     );
 
     return (
         <>
-        <NavSettings />
+            <NavSettings />
 
-        <div className="settings-container">
-            <div className="settings-content">
-            {/* API Block */}
-            <div className="settings shadow content">
-                <div className="head shadow">
-                <h1>API</h1>
-                </div>
-                <div id="api-settings" className="settings-block">
-                {renderApiInput("VPN", "vpn")}
-                {renderApiInput("assistant", "assistant")}
-                {renderApiInput("text correction", "textCorrection")}
-                </div>
-            </div>
-
-            {/* View Block */}
-            <div className="view-section">
-                <div className="settings shadow content">
-                    <div className="head shadow">
-                    <h1>view</h1>
-                    </div>
-                {/* Theme Section */}
-                <div id="view-settings" className="settings-block">
-                    <div className="items">
-                    <div className="items-it">
-                        <p>theme</p>
-                        <div className="items-blc choice">
-                        {renderThemeButton("white", "white")}
-                        {renderThemeButton("black", "black")}
-                        {renderThemeButton("custom", "custom")}
+            <div className="settings-container">
+                <div className="settings-content">
+                    {/* API Block */}
+                    <div className="settings shadow content">
+                        <div className="head shadow">
+                            <h1>API</h1>
+                        </div>
+                        <div id="api-settings" className="settings-block">
+                            {renderApiInput("VPN", "vpn")}
+                            {renderApiInput("assistant", "assistant")}
+                            {renderApiInput("text correction", "textCorrection")}
                         </div>
                     </div>
-                    </div>
 
-                    <div
-                    className={`picker-container ${
-                        showColorPicker ? "visible" : "hidden"
-                    }`}
-                    >
-                    <hr />
-                    <div className="items-color">
-                        {renderColorPicker("primary", "primary")}
-                        {renderColorPicker("secondary", "secondary")}
-                    </div>
-                    <hr />
+                    {/* View Block */}
+                    <div className="view-section">
+                        <div className="settings shadow content">
+                            <div className="head shadow">
+                                <h1>view</h1>
+                            </div>
+                            {/* Theme Section */}
+                            <div id="view-settings" className="settings-block">
+                                <div className="items">
+                                    <div className="items-it">
+                                        <p>theme</p>
+                                        <div className="items-blc choice">
+                                            {renderThemeButton("white", "white")}
+                                            {renderThemeButton("black", "black")}
+                                            {renderThemeButton("custom", "custom")}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    className={`picker-container ${
+                                        showColorPicker ? "visible" : "hidden"
+                                    }`}
+                                >
+                                    <hr />
+                                    <div className="picker-content">
+                                        {renderColorPickers()}
+                                    </div>
+                                    <hr />
+                                </div>
+                            </div>
+
+                            {/* Title Bar Section */}
+                            <div id="view-settings" className="settings-block">
+                                <div className="items">
+                                    <div className="items-it">
+                                        <p>title bar</p>
+                                        <div className="items-blc choice">
+                                            <button
+                                                className={titleBarType === "standard" ? "active" : ""}
+                                                onClick={() => handleTitleBarSelect("standard")}
+                                            >
+                                                standard
+                                            </button>
+                                            <button
+                                                className={titleBarType === "custom" ? "active" : ""}
+                                                onClick={() => handleTitleBarSelect("custom")}
+                                            >
+                                                custom
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    className={`picker-container ${
+                                        showTitleBarPicker ? "visible" : "hidden"
+                                    }`}
+                                >
+                                    <hr />
+                                    <div className="picker-content">
+                                        <div className="icon-selection">
+                                            <div className="icon-grid">
+                                                {titleBarIcons.map(icon => renderIconOption(icon))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Color Preview */}
+                        {showPreview && (
+                            <div className="color-preview-sidebar">
+                                <div className="preview-header">preview the color scheme</div>
+                                {contrastWarning && (
+                                    <div className="contrast-warning">
+                                        ⚠️ low contrast between colors
+                                    </div>
+                                )}
+                                <div className="preview-colors">
+                                    <div
+                                        className="preview-primary"
+                                        style={{ backgroundColor: allColors['primary-color'] }}
+                                    >
+                                        primary: {allColors['primary-color']}
+                                    </div>
+                                    <div
+                                        className="preview-secondary"
+                                        style={{
+                                            backgroundColor: allColors['secondary-color'],
+                                            color: getContrastColor(allColors['secondary-color']),
+                                        }}
+                                    >
+                                        secondary: {allColors['secondary-color']}
+                                    </div>
+                                </div>
+                                <div className="preview-elements">
+                                    <button className="example-button">
+                                        example of a button
+                                    </button>
+                                    <div className="example-card">
+                                        <h3>example of a card</h3>
+                                        <p>text of the cards with a demonstration of colors</p>
+                                    </div>
+                                    <div className="example-text">
+                                        example of a text with a selected color scheme
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* Title Bar Section */}
-                <div id="view-settings" className="settings-block">
-                    <div className="items">
-                    <div className="items-it">
-                        <p>title bar</p>
-                        <div className="items-blc choice">
-                        <button
-                            className={titleBarType === "standard" ? "active" : ""}
-                            onClick={() => handleTitleBarSelect("standard")}
+                {/* Global Save Button */}
+                <div className="global-save-section">
+                    {hasUnsavedChanges && (
+                        <button 
+                            className="save-button"
+                            onClick={saveAllSettings}
                         >
-                            standard
+                            Save All Settings
                         </button>
-                        <button
-                            className={titleBarType === "custom" ? "active" : ""}
-                            onClick={() => handleTitleBarSelect("custom")}
-                        >
-                            custom
-                        </button>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div
-                    className={`picker-container ${
-                        showTitleBarPicker ? "visible" : "hidden"
-                    }`}
-                    >
-                    <hr />
-                    <div className="items-color">
-                        <div className="icon-selection">
-
-                        </div>
-                    </div>
-                    <hr />
-                    </div>
-                </div>
-                </div>
-
-                {/* Color Preview */}
-                {showPreview && (
-                <div className="color-preview-sidebar">
-                    <div className="preview-header">preview the color scheme</div>
-                    {contrastWarning && (
-                    <div className="contrast-warning">
-                        ⚠️ low contrast between colors
-                    </div>
                     )}
-                    <div className="preview-colors">
-                    <div
-                        className="preview-primary"
-                        style={{ backgroundColor: colors.primary }}
-                    >
-                        primary: {colors.primary}
-                    </div>
-                    <div
-                        className="preview-secondary"
-                        style={{
-                        backgroundColor: colors.secondary,
-                        color: getContrastColor(colors.secondary),
-                        }}
-                    >
-                        secondary: {colors.secondary}
-                    </div>
-                    </div>
-                    <div className="preview-elements">
-                    <button className="example-button">
-                        example of a button
-                    </button>
-                    <div className="example-card">
-                        <h3>example of a card</h3>
-                        <p>text of the cards with a demonstration of colors</p>
-                    </div>
-                    <div className="example-text">
-                        example of a text with a selected color scheme
-                    </div>
-                    </div>
+                    {saveMessage && (
+                        <div className="save-message">
+                            {saveMessage}
+                        </div>
+                    )}
                 </div>
-                )}
             </div>
-            </div>
-        </div>
         </>
-    )}
+    );
+};
 
 export default Settings;

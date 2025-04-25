@@ -2,6 +2,7 @@ $primary-color: #DD9090;
 $secondary-color: #723A3A;
 
 .title-bar {
+    // overflow: hidden !important;
 
     display: flex;
     justify-content: space-between;
@@ -19,16 +20,6 @@ $secondary-color: #723A3A;
     // bottom: 0;
     z-index: 2000; // Убедимся, что TitleBar всегда сверху
 
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-
-    background-color: $primary-color;
-    color: white;
-    -webkit-app-region: drag; // Позволяет перемещать окно
-    padding: 0 10px;
 
     button {
         background: none;
@@ -46,7 +37,7 @@ $secondary-color: #723A3A;
         height: 20px;
         margin: 3px 0 8px;
         cursor: pointer;
-        -webkit-app-region: no-drag !important; // Отключаем drag для кликабельного элемента
+        -webkit-app-region: no-drag; // Отключаем drag для кликабельного элемента
     }
 
     &-trapezoid {
@@ -63,7 +54,8 @@ $secondary-color: #723A3A;
             -webkit-app-region: no-drag;
         }
 
-        .microphone, .decoding {
+        .microphone,
+        .decoding {
             margin-right: 30px;
             border-right: 2px solid $primary-color;
             padding: 3px 30px 3px 0;
@@ -73,6 +65,7 @@ $secondary-color: #723A3A;
             align-items: center;
             height: 15px;
             gap: 20px;
+            // Отключаем drag для кликабельного элемента
 
             .mic {
                 height: 24px;

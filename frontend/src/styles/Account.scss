@@ -1,8 +1,5 @@
-$primary-color: #DD9090;
-$secondary-color: #723A3A;
-
 .shadow {
-    box-shadow: 0 10px 40px #723A3A;
+    box-shadow: 0 10px 40px var(--secondary-color);
 }
 
 .account-container {
@@ -18,7 +15,7 @@ $secondary-color: #723A3A;
     margin-bottom: 2rem;
 
     h1 {
-        color: $secondary-color;
+        color: var(--secondary-color);
         font-size: 2rem;
     }
 }
@@ -32,11 +29,11 @@ $secondary-color: #723A3A;
     z-index: 10;
 
     h2 {
-        color: $secondary-color;
+        color: var(--secondary-color);
         margin-bottom: 1.5rem;
 
         .username {
-            color: $secondary-color;
+            color: var(--secondary-color);
             font-weight: bold;
         }
     }
@@ -47,7 +44,7 @@ $secondary-color: #723A3A;
     background-color: white;
 
     h3 {
-        color: $secondary-color;
+        color: var(--secondary-color);
         margin-bottom: 1rem;
     }
 
@@ -93,8 +90,8 @@ $secondary-color: #723A3A;
     width: 180px;
     height: 50px;
     background-color: white;
-    color: $secondary-color;
-    border: 2px solid $secondary-color;
+    color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.7s ease;
@@ -113,7 +110,7 @@ $secondary-color: #723A3A;
     }
 
     &:hover {
-        background-color: $secondary-color;
+        background-color: var(--secondary-color);
         color: white;
         padding-right: 40px;
         width: 140px;
@@ -160,11 +157,11 @@ $secondary-color: #723A3A;
 .account-error {
     text-align: center;
     padding: 2rem;
-    color: $secondary-color;
+    color: var(--secondary-color);
 }
 
 .switch-btn:disabled {
-    background: #cccccc;
+    background: var(--background-color);
     cursor: not-allowed;
 }
 
@@ -180,7 +177,7 @@ $secondary-color: #723A3A;
     border-radius: 20px;
     border: 2px solid rgb(184, 182, 182);
     padding: 60px;
-    background-color: white;
+    background-color: var(--background-color);
 }
 
 .request {
@@ -190,8 +187,8 @@ $secondary-color: #723A3A;
 }
 
 .req {
-    color: $secondary-color;
-    border: 2px dashed $secondary-color;
+    color: var(--secondary-color);
+    border: 2px dashed var(--secondary-color);
     width: 400px;
     border-radius: 20px;
     font-size: 16px;

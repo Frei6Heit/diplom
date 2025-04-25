@@ -2,6 +2,7 @@ $primary-color: #DD9090;
 $secondary-color: #723A3A;
 $main-font: "Chango", serif;
 
+
 .shadow {
     box-shadow: 0 10px 40px #723A3A;
 }
@@ -20,48 +21,7 @@ $main-font: "Chango", serif;
         padding: 20px;
 
         background-color: white;
-    }
-}
-.main {
-    padding: 60px;
-    font-family: $main-font;
 
-    position: relative;
-    padding-top: 50px;
-
-    overflow: auto !important;
-    height: calc(100vh - 90px);
-
-    &::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-        margin-top: 50px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-color: #723A3A;
-        border-radius: 5px;
-        width: 10px;
-        height: 10px;
-    }
-
-    &::-webkit-scrollbar-track {
-        border-radius: 40px;
-        width: 10px;
-        height: 10px;
-        margin-top: 50px;
-    }
-    
-        // ...
-
-    &-search {
-        width: 97%;
-        border: 5px solid black;
-        border-radius: 40px;
-        height: auto !important;
-        padding: 20px;
-
-        margin-bottom: 130px;
 
         &-field {
             border: 2px solid black;
@@ -73,13 +33,6 @@ $main-font: "Chango", serif;
             padding: 10px 20px;
             font-family: $main-font;
             font-size: 20px;
-
-            padding: 10px 5px;
-            font-family: $main-font;
-            font-size: 20px;
-
-            display: flex;
-            align-items: center;
 
             &-inp {
                 border: none;
@@ -129,6 +82,7 @@ $main-font: "Chango", serif;
 
         }
     }
+
     .content {
         margin-top: 80px;
 
@@ -282,50 +236,4 @@ $main-font: "Chango", serif;
     margin-top: -15px;
     z-index: -10;
     margin-bottom: 0;
-}
-
-.favorite {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    height: 25px;
-
-    // gap: 6%;
-    justify-content: space-between;
-
-
-    &-circle {
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        background-color: $secondary-color;
-    }
-
-    &-line {
-        width: 50%;
-        height: 5px;
-        background-color: $secondary-color;
-        border-radius: 5px;
-
-        // border: none;
-        outline: none;
-        // background: transparent;
-        position: relative;
-
-
-    }
-
-    p {
-        font-size: 60px;
-        color: $secondary-color;
-    }
-}
-
-.list-fv {
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
