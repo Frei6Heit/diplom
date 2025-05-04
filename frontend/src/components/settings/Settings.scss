@@ -6,7 +6,7 @@
     --background-color: white;
     --border-color: black;
     --button-color: #237E3F;
-    
+
     // Дополнительные переменные
     --text-color: #333;
     --contrast-text-color: white;
@@ -300,7 +300,7 @@
 /* Анимированный контейнер для цветовых пикеров */
 .picker-container {
     overflow: hidden;
-    transition: 
+    transition:
         max-height 0.5s ease-in-out,
         opacity 0.3s ease 0.1s,
         margin 0.3s ease;
@@ -324,12 +324,12 @@
         border-radius: 5px;
         transition: all 0.3s ease;
         position: relative;
-        
+
         &:first-child {
             transform-origin: left center;
             transform: scaleX(0);
         }
-        
+
         &:last-child {
             transform-origin: right center;
             transform: scaleX(0);
@@ -338,11 +338,11 @@
 
     &.visible hr {
         transform: scaleX(1);
-        
+
         &:first-child {
             transition: transform 0.3s ease-out;
         }
-        
+
         &:last-child {
             transition: transform 0.3s ease-out 0.2s;
         }
@@ -351,7 +351,7 @@
     .picker-content {
         opacity: 0;
         transform: translateY(-10px);
-        transition: 
+        transition:
             opacity 0.3s ease 0.4s,
             transform 0.3s ease 0.4s;
     }
@@ -478,6 +478,7 @@
         }
     }
 }
+
 .global-save-section {
     position: fixed;
     bottom: 30px;
@@ -522,10 +523,245 @@
     }
 
     @keyframes fadeInOut {
-        0% { opacity: 0; transform: translateY(10px); }
-        20% { opacity: 1; transform: translateY(0); }
-        80% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(10px); }
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        20% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        80% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        100% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    }
+}
+
+
+.settings-loading,
+.settings-error {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-color);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+
+    .modal-content {
+        background-color: var(--card-background);
+        padding: 2rem;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        h3 {
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            background-color: var(--input-background);
+            color: var(--text-color);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+
+            button {
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+
+                &.cancel-btn {
+                    background-color: var(--warning-background);
+                    color: var(--warning-text);
+                }
+
+                &.confirm-btn {
+                    background-color: var(--button-color);
+                    color: var(--contrast-text-color);
+                }
+            }
+        }
+    }
+}
+
+.app-management {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    .app-form {
+        .form-group {
+            margin-bottom: 1.5rem;
+
+            label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+                color: var(--text-color);
+            }
+
+            input {
+                width: 100%;
+                padding: 0.5rem;
+                border: 1px solid var(--input-border);
+                border-radius: 4px;
+                background-color: var(--input-background);
+                color: var(--text-color);
+            }
+        }
+
+        .trigger-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+
+            .trigger-word {
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+                padding: 0.3rem 0.6rem;
+                background-color: var(--card-background);
+                border-radius: 20px;
+                font-size: 0.9rem;
+
+                .remove-trigger {
+                    background: none;
+                    border: none;
+                    color: var(--text-color);
+                    cursor: pointer;
+                    padding: 0;
+
+                    &:hover {
+                        color: var(--primary-color);
+                    }
+                }
+            }
+
+            .add-trigger {
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+                background: none;
+                border: none;
+                color: var(--primary-color);
+                cursor: pointer;
+                font-size: 0.9rem;
+                padding: 0;
+            }
+        }
+
+        .save-app {
+            background-color: var(--button-color);
+            color: var(--contrast-text-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 1rem;
+
+            &:hover {
+                opacity: 0.9;
+            }
+        }
+    }
+
+    .apps-list {
+        h3 {
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .no-apps {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 1rem;
+
+            .app-item {
+                background-color: var(--card-background);
+                padding: 1rem;
+                border-radius: 4px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+                .app-info {
+                    margin-bottom: 0.5rem;
+
+                    strong {
+                        display: block;
+                        margin-bottom: 0.3rem;
+                        color: var(--text-color);
+                    }
+
+                    div {
+                        font-size: 0.9rem;
+                        opacity: 0.8;
+                        margin-top: 0.3rem;
+                        color: var(--text-color);
+                    }
+                }
+
+                .app-actions {
+                    display: flex;
+                    gap: 0.5rem;
+
+                    button {
+                        padding: 0.3rem 0.6rem;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 0.8rem;
+
+                        &.edit-app {
+                            background-color: var(--primary-color);
+                            color: var(--contrast-text-color);
+                        }
+
+                        &.delete-app {
+                            background-color: var(--warning-background);
+                            color: var(--warning-text);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

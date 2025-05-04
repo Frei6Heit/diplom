@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { debounce } from "lodash";
-import "../styles/Settings.scss";
-import NavSettings from "../components/dop_func/NavSettings.jsx";
+import "./Settings.scss";
+import NavSettings from "./NavSettings.jsx";
+import { toast } from 'react-toastify';
+import AppManagement from './AppManagement';
 
 const titleBarIcons = [
     { id: 1, name: "microphone" },
@@ -36,41 +38,32 @@ const colorVariables = [
 
 const Settings = () => {
     // Theme states
-    const [theme, setTheme] = useState(
-        () => localStorage.getItem("selectedTheme") || "white"
-    );
+    const [theme, setTheme] = useState("white");
     const [contrastWarning, setContrastWarning] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [saveMessage, setSaveMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
     
     const showColorPicker = theme === "custom";
     const showPreview = theme === "custom";
 
+    // const [theme, setTheme] = useState("white");
+    const [apps, setApps] = useState([]); // <-- Добавили состояние для приложений
+
     // Title bar states
-    const [titleBarType, setTitleBarType] = useState(
-        () => localStorage.getItem("titleBarType") || "standard"
-    );
+    const [titleBarType, setTitleBarType] = useState("standard");
     const [showTitleBarPicker, setShowTitleBarPicker] = useState(false);
-    const [selectedIcon, setSelectedIcon] = useState(
-        () => localStorage.getItem("selectedIcon") || titleBarIcons[0].id
-    );
+    const [selectedIcon, setSelectedIcon] = useState(titleBarIcons[0].id);
 
     // API states
     const [apiSettings, setApiSettings] = useState({
-        vpn: localStorage.getItem("api_vpn") || "",
-        assistant: localStorage.getItem("api_assistant") || "",
-        textCorrection: localStorage.getItem("api_text_correction") || "",
+        vpn: "",
+        assistant: "",
+        textCorrection: "",
     });
 
     // All colors from :root
-    const [allColors, setAllColors] = useState(() => {
-        const initialColors = {};
-        colorVariables.forEach(variable => {
-            initialColors[variable.name] = localStorage.getItem(variable.name) || 
-                getComputedStyle(document.documentElement).getPropertyValue(`--${variable.name}`).trim();
-        });
-        return initialColors;
-    });
+    const [allColors, setAllColors] = useState({});
 
     // Helper functions
     const getContrastColor = (hexColor) => {
@@ -105,38 +98,102 @@ const Settings = () => {
                 newColors['secondary-color']
             ));
         }, 300),
-        []
+        [checkContrast]
     );
 
-    // Save all settings function
-    const saveAllSettings = () => {
-        // Save theme
-        localStorage.setItem("selectedTheme", theme);
-        
-        // Save colors if custom theme
-        if (theme === "custom") {
-            colorVariables.forEach(variable => {
-                localStorage.setItem(variable.name, allColors[variable.name]);
+    // Save to backend
+    const saveSettingsToBackend = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("User not authenticated");
+            }
+
+            const settingsData = {
+                theme,
+                colors: allColors,
+                title_bar: {
+                    type: titleBarType,
+                    selectedIcon: selectedIcon
+                },
+                api_settings: apiSettings,
+                apps
+            };
+
+            const response = await fetch("http://localhost:5000/auth/save_settings", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(settingsData)
             });
+
+            if (!response.ok) {
+                throw new Error("Failed to save settings");
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error("Error saving settings:", error);
+            throw error;
         }
-        
-        // Save title bar settings
-        localStorage.setItem("titleBarType", titleBarType);
-        if (titleBarType === "custom") {
-            localStorage.setItem("selectedIcon", selectedIcon);
+    };
+
+    // Load from backend
+    const loadSettingsFromBackend = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return null;
+
+            const response = await fetch("http://localhost:5000/auth/get_settings", {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to load settings");
+            }
+
+            const data = await response.json();
+            return data.settings;
+        } catch (error) {
+            console.error("Error loading settings:", error);
+            return null;
         }
-        
-        // Save API settings
-        Object.keys(apiSettings).forEach(key => {
-            localStorage.setItem(`api_${key}`, apiSettings[key]);
-        });
-        
-        setSaveMessage("All settings saved successfully!");
-        setHasUnsavedChanges(false);
-        
-        setTimeout(() => {
-            setSaveMessage("");
-        }, 3000);
+    };
+
+    // Save all settings function
+    const saveAllSettings = async () => {
+        try {
+            await saveSettingsToBackend();
+            
+            // Save to localStorage for immediate access
+            localStorage.setItem("selectedTheme", theme);
+            if (theme === "custom") {
+                colorVariables.forEach(variable => {
+                    localStorage.setItem(variable.name, allColors[variable.name]);
+                });
+            }
+            localStorage.setItem("titleBarType", titleBarType);
+            if (titleBarType === "custom") {
+                localStorage.setItem("selectedIcon", selectedIcon);
+            }
+            
+            Object.keys(apiSettings).forEach(key => {
+                localStorage.setItem(`api_${key}`, apiSettings[key]);
+            });
+            
+            setSaveMessage("Settings saved successfully!");
+            setHasUnsavedChanges(false);
+            
+            setTimeout(() => {
+                setSaveMessage("");
+            }, 3000);
+        } catch (error) {
+            toast.error("Failed to save settings: " + error.message);
+        }
     };
 
     // Handlers that mark changes as unsaved
@@ -220,22 +277,76 @@ const Settings = () => {
         markUnsaved();
     };
 
-    // Effects
+    // Load settings on component mount
     useEffect(() => {
-        // Initialize all colors on load
-        colorVariables.forEach(variable => {
-            const storedValue = localStorage.getItem(variable.name);
-            if (storedValue) {
-                document.documentElement.style.setProperty(`--${variable.name}`, storedValue);
+        const loadSettings = async () => {
+            setIsLoading(true);
+            try {
+                const savedSettings = await loadSettingsFromBackend();
+                
+                if (savedSettings) {
+                    // Apply theme settings
+                    if (savedSettings.theme) {
+                        setTheme(savedSettings.theme);
+                        
+                        if (savedSettings.theme === "custom" && savedSettings.colors) {
+                            setAllColors(savedSettings.colors);
+                            updateColors(savedSettings.colors);
+                        } else {
+                            handleThemeSelect(savedSettings.theme);
+                        }
+                    }
+                    
+                    // Apply title bar settings
+                    if (savedSettings.title_bar) {
+                        setTitleBarType(savedSettings.title_bar.type || "standard");
+                        setSelectedIcon(savedSettings.title_bar.selectedIcon || titleBarIcons[0].id);
+                    }
+                    
+                    // Apply API settings
+                    if (savedSettings.api_settings) {
+                        setApiSettings(savedSettings.api_settings);
+                    }
+                } else {
+                    // Fallback to localStorage if no backend settings
+                    const localTheme = localStorage.getItem("selectedTheme") || "white";
+                    setTheme(localTheme);
+                    
+                    if (localTheme === "custom") {
+                        const localColors = {};
+                        colorVariables.forEach(variable => {
+                            const color = localStorage.getItem(variable.name) || 
+                                getComputedStyle(document.documentElement).getPropertyValue(`--${variable.name}`).trim();
+                            localColors[variable.name] = color;
+                        });
+                        setAllColors(localColors);
+                        updateColors(localColors);
+                    } else {
+                        handleThemeSelect(localTheme);
+                    }
+                    
+                    const localTitleBarType = localStorage.getItem("titleBarType") || "standard";
+                    setTitleBarType(localTitleBarType);
+                    
+                    const localSelectedIcon = localStorage.getItem("selectedIcon") || titleBarIcons[0].id;
+                    setSelectedIcon(localSelectedIcon);
+                    
+                    const localApiSettings = {};
+                    ['vpn', 'assistant', 'textCorrection'].forEach(key => {
+                        localApiSettings[key] = localStorage.getItem(`api_${key}`) || "";
+                    });
+                    setApiSettings(localApiSettings);
+                }
+            } catch (error) {
+                console.error("Error loading settings:", error);
+                toast.error("Failed to load settings");
+            } finally {
+                setIsLoading(false);
             }
-        });
+        };
         
-        // Check contrast for current colors
-        setContrastWarning(checkContrast(
-            allColors['primary-color'],
-            allColors['secondary-color']
-        ));
-    }, []);
+        loadSettings();
+    }, [updateColors]);
 
     // Render helpers
     const renderApiInput = (label, field) => (
@@ -269,12 +380,12 @@ const Settings = () => {
                 <div key={variable.name} className="color-input-group">
                     <input
                         type="color"
-                        value={allColors[variable.name]}
+                        value={allColors[variable.name] || "#ffffff"}
                         onChange={(e) => handleColorChange(variable.name, e.target.value)}
                         aria-label={`Select ${variable.label} color`}
                     />
                     <input
-                        value={allColors[variable.name]}
+                        value={allColors[variable.name] || ""}
                         className="color-input"
                         onChange={(e) => handleColorChange(variable.name, e.target.value)}
                     />
@@ -294,6 +405,14 @@ const Settings = () => {
             {selectedIcon == id && <span className="checkmark">✓</span>}
         </div>
     );
+
+    if (isLoading) {
+        return (
+            <div className="settings-loading">
+                <p>Loading settings...</p>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -427,6 +546,12 @@ const Settings = () => {
                         )}
                     </div>
                 </div>
+
+                <AppManagement 
+                    markUnsaved={markUnsaved} 
+                    apps={apps} 
+                    setApps={setApps} 
+                />
 
                 {/* Global Save Button */}
                 <div className="global-save-section">

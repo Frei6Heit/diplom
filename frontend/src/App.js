@@ -5,7 +5,7 @@ import "./styles/main.scss";
 import TitleBar from './components/TitleBar';
 import Auth from './components/Auth';
 import Main from './components/Main';
-import Settings from './components/Settings';
+import Settings from './components/settings/Settings';
 import Assistant from './components/Assistant';
 import Account from './components/Account';
 import Decoding from './components/Decoding';

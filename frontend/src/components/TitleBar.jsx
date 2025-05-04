@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../styles/TitleBar.scss";
 import icons from './import/ImportSVG.jsx';
 import Burger from './Burger'; // Импортируем компонент Burger
-import Settings from './Settings'; // Импортируем компонент Settings
+import Settings from './settings/Settings'; // Импортируем компонент Settings
 
 const TitleBar = () => {
     const [isMenuOpen, setMenuOpen] = useState(false);
@@ -23,7 +23,7 @@ const TitleBar = () => {
 
             <div className="title-bar-trapezoid">
                 <div className="title-bar-content-left">
-                    <div className="microphone">
+                    <div className="microphonet">
                         <a className="mic">
                             <icons.Microphone />
                         </a>
@@ -40,7 +40,7 @@ const TitleBar = () => {
                         </button>
                     </div>
 
-                    <div className="message"> 
+                    <div className="messaget"> 
                         <a href="/assistant" className="mic">
                             <icons.Message />
                         </a>

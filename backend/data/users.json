@@ -21,7 +21,73 @@
         "username": "1",
         "password": "$argon2id$v=19$m=65536,t=3,p=4$/GqugMI4mBIxPCKnOahHCw$RVWzrRjXRl1Pc7cU5h/Z6CsBnMblgihBcbCBBeVFBPE",
         "remember_me": false,
-        "timestamp": "2025-02-24T23:22:01.800019"
+        "timestamp": "2025-02-24T23:22:01.800019",
+        "settings": {
+            "theme": "black",
+            "colors": {
+                "primary-color": "#333333",
+                "secondary-color": "#DD9090",
+                "background-color": "black",
+                "border-color": "#444",
+                "button-color": "#237E3F",
+                "text-color": "white",
+                "contrast-text-color": "#000",
+                "card-background": "#222",
+                "shadow-color": "rgba(255, 255, 255, 0.1)",
+                "warning-background": "#333",
+                "warning-text": "#ffcc00",
+                "input-border": "#444",
+                "input-background": "#222",
+                "preview-border": "#444",
+                "section-background": "#1a1a1a"
+            },
+            "title_bar": {
+                "type": "standard",
+                "selectedIcon": 1
+            },
+            "api_settings": {
+                "assistant": "",
+                "textCorrection": "",
+                "vpn": ""
+            },
+            "apps": [
+                {
+                    "name": "стим",
+                    "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+                    "triggerWords": [
+                        "steam",
+                        "стим"
+                    ]
+                },
+                {
+                    "name": "с",
+                    "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+                    "triggerWords": [
+                        "стим",
+                        "steam"
+                    ]
+                }
+            ],
+            "last_updated": "2025-05-04T02:10:44.026463"
+        },
+        "apps": [
+            {
+                "name": "стим",
+                "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+                "triggerWords": [
+                    "steam",
+                    "стим"
+                ]
+            },
+            {
+                "name": "с",
+                "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+                "triggerWords": [
+                    "стим",
+                    "steam"
+                ]
+            }
+        ]
     },
     {
         "username": "5",
