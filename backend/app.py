@@ -7,7 +7,14 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+app.config['messages'] = {} 
+CORS(app, resources={
+    r"/api/assistant/*": {
+        "origins": ["http://localhost:3000"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Конфигурация
 app.config.update({

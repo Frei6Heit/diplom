@@ -7,61 +7,75 @@ const Assistant = () => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isRecording, setIsRecording] = useState(false);
-    const [isAudioRecording, setIsAudioRecording] = useState(false);
+    const [isVoiceAssistantActive, setIsVoiceAssistantActive] = useState(false);
+    const [listeningState, setListeningState] = useState('idle'); // Добавлено состояние
     
     const messagesEndRef = useRef(null);
     const abortControllerRef = useRef(new AbortController());
-    const mediaRecorderRef = useRef(null);
-    const audioChunksRef = useRef([]);
-    const recognitionRef = useRef(null);
+    const eventSourceRef = useRef(null);
 
+    // Прокрутка к новым сообщениям
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    // SSE соединение для получения сообщений
     useEffect(() => {
-        return () => {
-            abortControllerRef.current.abort();
-            stopAudioRecording();
-            stopRecording();
-        };
-    }, []);
+        if (!isVoiceAssistantActive) {
+            if (eventSourceRef.current) {
+                eventSourceRef.current.close();
+                eventSourceRef.current = null;
+            }
+            return;
+        }
 
-    const safeApiCall = async (query, audioBlob = null) => {
+        const token = localStorage.getItem('token');
+        eventSourceRef.current = new EventSource(`http://localhost:5000/api/assistant/events?token=${token}`);
+
+        eventSourceRef.current.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if (data?.messages?.length > 0) {
+                setMessages(prev => [...prev, ...data.messages]);
+                
+                // Обновляем состояние на основе последнего сообщения
+                const lastMessage = data.messages[data.messages.length - 1];
+                if (lastMessage.type === 'command') {
+                    setListeningState('processing');
+                } else if (lastMessage.type === 'response') {
+                    setListeningState('waiting');
+                }
+            }
+        };
+
+        eventSourceRef.current.onerror = () => {
+            eventSourceRef.current?.close();
+            setListeningState('idle');
+            setIsVoiceAssistantActive(false);
+            toast.error('Соединение с ассистентом прервано');
+        };
+
+        return () => {
+            eventSourceRef.current?.close();
+        };
+    }, [isVoiceAssistantActive]);
+
+    const safeApiCall = async (query) => {
         abortControllerRef.current = new AbortController();
         const token = localStorage.getItem('token');
 
         try {
-            if (audioBlob) {
-                const formData = new FormData();
-                formData.append('audio', audioBlob, 'recording.webm');
-                
-                const response = await axios.post(
-                    'http://localhost:5000/api/assistant/audio',
-                    formData,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                        },
-                        signal: abortControllerRef.current.signal
-                    }
-                );
-                return response.data;
-            } else {
-                const response = await axios.post(
-                    'http://localhost:5000/api/assistant/chat',
-                    { query },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        signal: abortControllerRef.current.signal
-                    }
-                );
-                return response.data;
-            }
+            const response = await axios.post(
+                'http://localhost:5000/api/assistant/chat',
+                { query },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    signal: abortControllerRef.current.signal
+                }
+            );
+            return response.data;
         } catch (error) {
             if (!axios.isCancel(error)) {
                 throw error;
@@ -70,53 +84,63 @@ const Assistant = () => {
         }
     };
 
-    const startAudioRecording = async () => {
+    const startVoiceAssistant = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
-            audioChunksRef.current = [];
-
-            mediaRecorderRef.current.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    audioChunksRef.current.push(e.data);
+            setListeningState('waiting');
+            const token = localStorage.getItem('token');
+            await axios.post(
+                'http://localhost:5000/api/assistant/start_voice_assistant',
+                {},
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 }
-            };
-
-            mediaRecorderRef.current.onstop = async () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                await handleSend('', audioBlob);
-            };
-
-            mediaRecorderRef.current.start(1000);
-            setIsAudioRecording(true);
-            toast.info('Запись аудио начата');
+            );
+            setIsVoiceAssistantActive(true);
+            toast.info('Скажите "ассистент" для активации');
         } catch (error) {
-            toast.error(`Ошибка доступа к микрофону: ${error.message}`);
+            toast.error(`Ошибка запуска: ${error.response?.data?.error || error.message}`);
+            setListeningState('idle');
         }
     };
 
-    const stopAudioRecording = () => {
-        if (mediaRecorderRef.current?.state === 'recording') {
-            mediaRecorderRef.current.stop();
-            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-            setIsAudioRecording(false);
-            toast.info('Запись аудио остановлена');
+    const stopVoiceAssistant = async () => {
+        try {
+            setListeningState('idle');
+            const token = localStorage.getItem('token');
+            await axios.post(
+                'http://localhost:5000/api/assistant/stop_voice_assistant',
+                {},
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+            setIsVoiceAssistantActive(false);
+        } catch (error) {
+            toast.error(`Ошибка остановки: ${error.message}`);
         }
     };
 
-    const handleSend = async (text = input, audioBlob = null) => {
-        if ((!text.trim() && !audioBlob) || isLoading) return;
+    const toggleVoiceAssistant = () => {
+        if (isVoiceAssistantActive) {
+            stopVoiceAssistant();
+        } else {
+            startVoiceAssistant();
+        }
+    };
+
+    const handleSend = async (text = input) => {
+        if (!text.trim() || isLoading) return;
 
         setIsLoading(true);
-        if (text) {
-            setMessages(prev => [...prev, { text, sender: 'user' }]);
-            setInput('');
-        } else {
-            setMessages(prev => [...prev, { text: '[Аудиосообщение]', sender: 'user', isAudio: true }]);
-        }
+        setMessages(prev => [...prev, { text, sender: 'user', isVoice: false }]);
+        setInput('');
 
         try {
-            const data = await safeApiCall(text, audioBlob);
+            const data = await safeApiCall(text);
             if (data) {
                 setMessages(prev => [
                     ...prev,
@@ -140,71 +164,19 @@ const Assistant = () => {
         }
     };
 
-    const startRecording = () => {
-        if (!('webkitSpeechRecognition' in window)) {
-            toast.error('Голосовой ввод не поддерживается');
-            return;
-        }
-
-        const recognition = new window.webkitSpeechRecognition();
-        recognitionRef.current = recognition;
-        recognition.lang = 'ru-RU';
-        recognition.interimResults = false;
-
-        recognition.onstart = () => {
-            setIsRecording(true);
-            setInput('Слушаю...');
-        };
-
-        recognition.onresult = (e) => {
-            const transcript = e.results[0][0].transcript.trim();
-            if (transcript) {
-                setInput(transcript);
-                setTimeout(() => handleSend(transcript), 300);
-            }
-        };
-
-        recognition.onerror = (e) => {
-            if (e.error !== 'no-speech') {
-                toast.error(`Ошибка: ${e.error}`);
-            }
-            setIsRecording(false);
-            setInput('');
-        };
-
-        recognition.onend = () => {
-            setIsRecording(false);
-            if (input === 'Слушаю...') setInput('');
-        };
-
-        try {
-            recognition.start();
-        } catch (e) {
-            toast.error('Не удалось получить доступ к микрофону');
-            setIsRecording(false);
-        }
-    };
-
-    const stopRecording = () => {
-        recognitionRef.current?.stop();
-        setIsRecording(false);
-        if (input === 'Слушаю...') setInput('');
-    };
-
     return (
         <div className="assistant-container">
             <div className="chat-window">
                 {messages.map((msg, i) => (
-                    <div key={i} className={`message ${msg.sender} ${msg.isError ? 'error' : ''}`}>
+                    <div 
+                        key={i} 
+                        className={`message ${msg.sender} ${msg.isError ? 'error' : ''}`}
+                    >
                         <div className="message-content">
                             <div className="message-sender">
                                 {msg.sender === 'user' ? 'Вы' : 'Ассистент'}
                             </div>
-                            {msg.isAudio ? (
-                                <div className="audio-message">[Аудиосообщение]</div>
-                            ) : (
-                                <div className="message-text">{msg.text}</div>
-                            )}
+                            <div className="message-text">{msg.text}</div>
                             {msg.isApp && (
                                 <button 
                                     className="launch-app-btn"
@@ -232,50 +204,28 @@ const Assistant = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Введите сообщение..."
-                    disabled={isLoading || isAudioRecording}
+                    disabled={isLoading}
                 />
 
                 <button 
                     onClick={() => handleSend()}
-                    disabled={isLoading || (!input.trim() && !isAudioRecording)}
+                    disabled={isLoading || !input.trim()}
                     className={isLoading ? 'loading' : ''}
                 >
-                    {isLoading ? (
-                        <>
-                            <span className="spinner"></span>
-                            Отправка...
-                        </>
-                    ) : 'Отправить'}
+                    {isLoading ? 'Отправка...' : 'Отправить'}
                 </button>
 
                 <div className="voice-controls">
-                    {isRecording ? (
-                        <button onClick={stopRecording} className="recording">
-                            <span className="pulse"></span>
-                            Остановить голос
-                        </button>
-                    ) : (
-                        <button 
-                            onClick={startRecording} 
-                            disabled={isLoading || isAudioRecording}
-                        >
-                            Голосовой ввод
-                        </button>
-                    )}
-
-                    {isAudioRecording ? (
-                        <button onClick={stopAudioRecording} className="audio-recording">
-                            <span className="pulse"></span>
-                            Остановить запись
-                        </button>
-                    ) : (
-                        <button 
-                            onClick={startAudioRecording} 
-                            disabled={isLoading || isRecording}
-                        >
-                            Запись аудио
-                        </button>
-                    )}
+                    <button 
+                        onClick={toggleVoiceAssistant}
+                        className={`voice-btn ${isVoiceAssistantActive ? 'active' : ''} ${listeningState}`}
+                        disabled={isLoading}
+                    >
+                        {listeningState === 'idle' && 'Активировать ассистента'}
+                        {listeningState === 'waiting' && 'Ожидание "ассистент"...'}
+                        {listeningState === 'listening' && 'Слушаю команду...'}
+                        {listeningState === 'processing' && 'Обработка...'}
+                    </button>
                 </div>
             </div>
         </div>

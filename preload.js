@@ -3,9 +3,9 @@ const { contextBridge, ipcRenderer } = require('electron');
 // Безопасное предоставление API в рендер-процесс
 contextBridge.exposeInMainWorld('electronAPI', {
     windowControl: {
-        minimize: () => ipcRenderer.send('window:minimize'),
-        maximize: () => ipcRenderer.send('window:maximize'),
-        close: () => ipcRenderer.send('window:close')
+        minimize: () => ipcRenderer.send('window-control:minimize'),
+        maximize: () => ipcRenderer.send('window-control:maximize'),
+        close: () => ipcRenderer.send('window-control:close')
     },
     shell: {
         openPath: (path) => ipcRenderer.invoke('shell:openPath', path)

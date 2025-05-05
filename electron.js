@@ -1,134 +1,84 @@
-const { app, BrowserWindow, ipcMain, session } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-
-// Конфигурация приложения
-app.name = 'MyElectronApp';
-app.allowRendererProcessReuse = true;
 
 let mainWindow;
 
 function createWindow() {
-    // Настройки сессии для отключения проблемных функций
-    configureSession();
-
     mainWindow = new BrowserWindow({
         width: 1200,
-        height: 800,
-        minWidth: 1000,
-        minHeight: 700,
-        frame: false,
-        show: false,
+        height: 600,
+        minHeight: 800,
+        minWidth: 1200,
+        frame: false,  // Убираем стандартную рамку окна
         webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            sandbox: true,
-            webSecurity: true,
+            nodeIntegration: false,  // Отключаем nodeIntegration для безопасности
+            contextIsolation: true,  // Включаем contextIsolation
             preload: path.join(__dirname, 'preload.js'),
-            disableBlinkFeatures: 'AutofillAPI',
-            autoplayPolicy: 'user-gesture-required'
-        }
+            contentSecurityPolicy: `
+                default-src 'self';
+                script-src 'self';
+                style-src 'self' 'unsafe-inline';
+                img-src 'self' data:;
+                connect-src 'self';
+                font-src 'self';
+                frame-src 'none';
+                object-src 'none';
+            `.replace(/\s+/g, ' ') 
+        },
     });
 
-    // Загрузка приложения
-    mainWindow.loadURL(
-        process.env.NODE_ENV === 'development'
-            ? 'http://localhost:3000'
-            : `file://${path.join(__dirname, '../build/index.html')}`
-    );
+    // Загружаем React-приложение
+    mainWindow.loadURL('http://localhost:3000');
 
-    // Оптимизация производительности
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
-        if (process.env.NODE_ENV === 'development') {
-            mainWindow.webContents.openDevTools({ mode: 'detach' });
-        }
-    });
+    // Открываем DevTools для отладки (опционально)
+    // mainWindow.webContents.openDevTools();
 
-    // Обработчики событий окна
-    mainWindow.on('closed', () => (mainWindow = null));
-    mainWindow.on('focus', () => mainWindow.webContents.send('window-focus'));
-    mainWindow.on('blur', () => mainWindow.webContents.send('window-blur'));
-
-    // Настройка веб-запросов
-    setupRequestHandlers();
-}
-
-function configureSession() {
-    try {
-        const mainSession = session.defaultSession;
-        
-        // Отключаем проблемные функции
-        app.commandLine.appendSwitch('disable-http-cache');
-        app.commandLine.appendSwitch('disable-background-timer-throttling');
-        app.commandLine.appendSwitch('disable-renderer-backgrounding');
-        app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication,TranslateUI');
-        
-        // Очистка кэша при запуске
-        mainSession.clearCache().catch(console.error);
-        mainSession.clearStorageData().catch(console.error);
-    } catch (error) {
-        console.error('Session configuration failed:', error);
-    }
-}
-
-function setupRequestHandlers() {
-    session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-        const newHeaders = {
-            ...details.requestHeaders,
-            'Connection': 'keep-alive',
-            'Accept-Encoding': 'gzip, deflate, br'
-        };
-        callback({ requestHeaders: newHeaders });
-    });
-
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-        const newHeaders = {
-            ...details.responseHeaders,
-            'Content-Security-Policy': [
-                "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline'; " +
-                "style-src 'self' 'unsafe-inline'; " +
-                "img-src 'self' data:; " +
-                "connect-src 'self' http://localhost:5000; " +
-                "font-src 'self'; " +
-                "frame-src 'none'; " +
-                "media-src 'self'; " +
-                "object-src 'none';"
-            ]
-        };
-        callback({ responseHeaders: newHeaders });
+    mainWindow.on('closed', () => {
+        mainWindow = null;
     });
 }
 
-// Обработчики IPC для управления окном
-ipcMain.handle('window:minimize', () => mainWindow?.minimize());
-ipcMain.handle('window:maximize', () => {
-    if (mainWindow?.isMaximized()) {
-        mainWindow.unmaximize();
-    } else {
-        mainWindow?.maximize();
-    }
-});
-ipcMain.handle('window:close', () => mainWindow?.close());
-
-// События жизненного цикла приложения
-app.whenReady().then(() => {
-    createWindow();
-    
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow();
-    });
-});
+app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
-// Обработка ошибок в главном процессе
-process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
+app.on('activate', () => {
+    if (mainWindow === null) {
+        createWindow();
+    }
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+// Обработчики для управления окном
+// Замените старые обработчики на эти:
+ipcMain.on('window-control:minimize', () => {
+    mainWindow.minimize();
 });
+
+ipcMain.on('window-control:maximize', () => {
+    if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize();
+    } else {
+        mainWindow.maximize();
+    }
+});
+
+ipcMain.on('window-control:close', () => {
+    mainWindow.close();
+});
+// main.js
+app.on('ready', () => {
+    // Отключаем нежелательные функции Chromium
+    app.commandLine.appendSwitch('disable-http-cache');
+    app.commandLine.appendSwitch('disable-background-timer-throttling');
+    app.commandLine.appendSwitch('disable-renderer-backgrounding');
+    
+    // Устанавливаем более стабильные параметры для сетевых запросов
+    // session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    // details.requestHeaders['Connection'] = 'keep-alive';
+    // callback({ cancel: false, requestHeaders: details.requestHeaders });
+});
+// });
