@@ -23,23 +23,23 @@
         "remember_me": false,
         "timestamp": "2025-02-24T23:22:01.800019",
         "settings": {
-            "theme": "white",
+            "theme": "custom",
             "colors": {
-                "primary-color": "#DD9090",
-                "secondary-color": "#723A3A",
-                "background-color": "white",
-                "border-color": "black",
+                "primary-color": "#333333",
+                "secondary-color": "#DD9090",
+                "background-color": "black",
+                "border-color": "#444",
                 "button-color": "#237E3F",
-                "text-color": "#333",
-                "contrast-text-color": "white",
-                "card-background": "white",
-                "shadow-color": "rgba(0, 0, 0, 0.1)",
-                "warning-background": "#fff3cd",
-                "warning-text": "#856404",
-                "input-border": "black",
-                "input-background": "white",
-                "preview-border": "#ddd",
-                "section-background": "#f5f5f5"
+                "text-color": "white",
+                "contrast-text-color": "#000",
+                "card-background": "#222",
+                "shadow-color": "rgba(255, 255, 255, 0.1)",
+                "warning-background": "#333",
+                "warning-text": "#ffcc00",
+                "input-border": "#444",
+                "input-background": "#222",
+                "preview-border": "#444",
+                "section-background": "#1a1a1a"
             },
             "title_bar": {
                 "type": "standard",
@@ -66,9 +66,17 @@
                         "стим",
                         "steam"
                     ]
+                },
+                {
+                    "name": "видео",
+                    "path": "E:\\видео\\2025-05-04 22-03-22.mp4",
+                    "triggerWords": [
+                        "video",
+                        "видео"
+                    ]
                 }
             ],
-            "last_updated": "2025-05-04T13:26:54.241303"
+            "last_updated": "2025-05-05T17:04:51.789036"
         },
         "apps": [
             {
@@ -85,6 +93,14 @@
                 "triggerWords": [
                     "стим",
                     "steam"
+                ]
+            },
+            {
+                "name": "видео",
+                "path": "E:\\видео\\2025-05-04 22-03-22.mp4",
+                "triggerWords": [
+                    "video",
+                    "видео"
                 ]
             }
         ]

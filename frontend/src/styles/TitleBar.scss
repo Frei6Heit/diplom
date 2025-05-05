@@ -1,3 +1,6 @@
+$primary-color: #DD9090;
+$secondary-color: #723A3A;
+
 .title-bar {
     // overflow: hidden !important;
 
@@ -5,7 +8,7 @@
     justify-content: space-between;
     align-items: center;
     height: 30px;
-    background-color: var(--primary-color);
+    background-color: $primary-color;
     color: var(--contrast-text-color);
     -webkit-app-region: drag; // Позволяет перемещать окно
     width: 99%; // Изменено на 100%
@@ -43,7 +46,7 @@
         padding: 3px 50px;
         display: flex;
         justify-content: space-between;
-        background-color: var(--secondary-color);
+        background-color: $secondary-color;
         clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 2% 100%);
         -webkit-app-region: drag; // Отключаем drag для кликабельного элемента
 
@@ -54,7 +57,7 @@
         .microphonet,
         .decoding {
             margin-right: 30px;
-            border-right: 2px solid var(--primary-color);
+            border-right: 2px solid $primary-color;
             padding: 3px 30px 3px 0;
             width: 90px;
             display: flex;

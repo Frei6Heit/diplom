@@ -416,7 +416,7 @@ const Settings = () => {
 
     return (
         <>
-            <NavSettings />
+            {/* <NavSettings /> */}
 
             <div className="settings-container">
                 <div className="settings-content">

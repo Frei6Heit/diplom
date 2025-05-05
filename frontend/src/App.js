@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import "./styles/main.scss";
+import { ThemeProvider } from '../src/components/settings/ThemeContext';
 
 import TitleBar from './components/TitleBar';
 import Auth from './components/Auth';
@@ -17,16 +18,18 @@ function App() {
     return (
         <Router>
             <TitleBar />
-            <Routes>
-                <Route path="/" element={<Auth />} />
-                <Route path="/login" element={<Auth />} />
-                <Route path="/main" element={<Main />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/assistant" element={<Assistant />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/decoding" element={<Decoding />} />
-                <Route path="*" element={<Auth />} />
-            </Routes>
+            <ThemeProvider>
+                <Routes>
+                    <Route path="/" element={<Auth />} />
+                    <Route path="/login" element={<Auth />} />
+                    <Route path="/main" element={<Main />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/assistant" element={<Assistant />} />
+                    <Route path="/account" element={<Account />} />
+                    <Route path="/decoding" element={<Decoding />} />
+                    <Route path="*" element={<Auth />} />
+                </Routes>
+            </ThemeProvider>
 
             <ToastContainer
                 position="top-right"

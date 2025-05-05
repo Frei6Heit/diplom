@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus, FaTrash } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './Settings.scss';
 
 const initialAppItem = {
@@ -20,7 +22,6 @@ const AppManagement = ({
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');
 
-    // Получаем username из localStorage при монтировании компонента
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
@@ -33,9 +34,12 @@ const AppManagement = ({
                 if (response.ok) {
                     const data = await response.json();
                     setUsername(data.current_user);
+                } else {
+                    toast.error('Ошибка получения данных пользователя');
                 }
             } catch (err) {
                 console.error('Ошибка получения пользователя:', err);
+                toast.error('Не удалось загрузить данные пользователя');
             }
         };
         
@@ -43,10 +47,13 @@ const AppManagement = ({
     }, []);
 
     const saveAppsToServer = async (appsToSave) => {
-        if (!username) return;
+        if (!username) {
+            toast.warning('Пользователь не определен. Пожалуйста, войдите заново.');
+            return;
+        }
         
         try {
-            await fetch('http://localhost:5000/auth/save_apps', {
+            const response = await fetch('http://localhost:5000/auth/save_apps', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -57,8 +64,15 @@ const AppManagement = ({
                     username: username 
                 })
             });
+
+            if (response.ok) {
+                toast.success('Приложения успешно сохранены');
+            } else {
+                toast.error('Ошибка при сохранении приложений');
+            }
         } catch (err) {
             console.error('Ошибка сохранения:', err);
+            toast.error('Не удалось сохранить приложения');
         }
     };
 
@@ -67,7 +81,10 @@ const AppManagement = ({
     };
 
     const handleTriggerWordSubmit = () => {
-        if (!triggerWordInput.trim()) return;
+        if (!triggerWordInput.trim()) {
+            toast.warning('Пожалуйста, введите триггерное слово');
+            return;
+        }
         
         setNewApp(prev => ({
             ...prev,
@@ -76,6 +93,7 @@ const AppManagement = ({
         
         setTriggerWordInput('');
         setShowTriggerWordModal(false);
+        toast.success('Триггерное слово добавлено');
     };
 
     const handleRemoveTriggerWord = (idx) => {
@@ -83,16 +101,18 @@ const AppManagement = ({
             ...prev,
             triggerWords: (prev.triggerWords || []).filter((_, i) => i !== idx)
         }));
+        toast.info('Триггерное слово удалено');
     };
 
     const handleAddOrUpdateApp = () => {
         if (!username) {
-            alert('Пользователь не определен. Пожалуйста, войдите заново.');
+            toast.error('Пользователь не определен. Пожалуйста, войдите заново.');
             return;
         }
 
         if (!newApp.name || !newApp.path) {
-            return alert('Имя и путь обязательны!');
+            toast.warning('Пожалуйста, заполните имя и путь приложения');
+            return;
         }
 
         const updatedApps = editingAppIndex === -1
@@ -104,19 +124,31 @@ const AppManagement = ({
         setNewApp(initialAppItem);
         setEditingAppIndex(-1);
         markUnsaved();
+
+        const message = editingAppIndex === -1 
+            ? 'Приложение успешно добавлено' 
+            : 'Приложение успешно обновлено';
+        toast.success(message);
     };
 
-    const handleDeleteApp = (index) => {
-        if (!window.confirm('Удалить это приложение?')) return;
+    const handleDeleteApp = async (index) => {
+        const confirm = window.confirm('Удалить это приложение?');
+        if (!confirm) {
+            toast.info('Удаление отменено');
+            return;
+        }
+
         const updatedApps = (apps || []).filter((_, i) => i !== index);
         setApps(updatedApps);
-        saveAppsToServer(updatedApps);
+        await saveAppsToServer(updatedApps);
         markUnsaved();
+        toast.success('Приложение удалено');
     };
 
     const handleEditApp = (index) => {
         setNewApp(apps[index]);
         setEditingAppIndex(index);
+        toast.info('Режим редактирования приложения');
     };
 
     useEffect(() => {
@@ -138,9 +170,11 @@ const AppManagement = ({
                 const data = await response.json();
                 if (data.apps) {
                     setApps(data.apps);
+                    toast.success('Приложения успешно загружены');
                 }
             } catch (err) {
                 console.error('Ошибка загрузки приложений:', err);
+                toast.error('Не удалось загрузить приложения');
             } finally {
                 setIsLoading(false);
             }
@@ -151,112 +185,147 @@ const AppManagement = ({
 
     return (
         <div className="settings shadow content">
-            {showTriggerWordModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h3>Добавить триггерное слово</h3>
-                        <input
-                            value={triggerWordInput}
-                            onChange={(e) => setTriggerWordInput(e.target.value)}
-                            placeholder="Например: калькулятор"
-                        />
-                        <div className="modal-actions">
-                            <button onClick={() => setShowTriggerWordModal(false)}>
-                                Отмена
-                            </button>
-                            <button onClick={handleTriggerWordSubmit}>
-                                Добавить
-                            </button>
+            <div className="head shadow">
+                <h1>apps</h1>
+            </div>
+            
+            <div className="settings-block items">
+                {showTriggerWordModal && (
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <h3>Добавить триггерное слово</h3>
+                            <input
+                                value={triggerWordInput}
+                                onChange={(e) => setTriggerWordInput(e.target.value)}
+                                placeholder="Например: калькулятор"
+                            />
+                            <div className="modal-actions">
+                                <button onClick={() => {
+                                    setShowTriggerWordModal(false);
+                                    toast.info('Добавление слова отменено');
+                                }}>
+                                    Отмена
+                                </button>
+                                <button onClick={handleTriggerWordSubmit}>
+                                    Добавить
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            <h2>Управление приложениями</h2>
-            
-            {isLoading ? (
-                <p>Загрузка приложений...</p>
-            ) : (
-                <>
-                    <div className="form-group">
-                        <label>Имя приложения</label>
-                        <input
-                            value={newApp.name}
-                            onChange={(e) => handleAppInputChange('name', e.target.value)}
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label>Путь к приложению</label>
-                        <input
-                            value={newApp.path}
-                            onChange={(e) => handleAppInputChange('path', e.target.value)}
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label>Триггерные слова</label>
-                        <div className="trigger-words">
-                            {(newApp.triggerWords || []).map((word, i) => (
-                                <div key={i} className="trigger-word-item">
-                                    {word}
+                {isLoading ? (
+                    <p>Загрузка приложений...</p>
+                ) : (
+                    <>
+                        <div className="items">
+                            <div className="items-it">
+                                <p>Имя приложения</p>
+                                <div className="items-blc">
+                                    <input
+                                        value={newApp.name}
+                                        onChange={(e) => handleAppInputChange('name', e.target.value)}
+                                        placeholder="insert"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="items">
+                            <div className="items-it">
+                                <p>Путь к приложению</p>
+                                <div className="items-blc">
+                                    <input
+                                        value={newApp.path}
+                                        onChange={(e) => handleAppInputChange('path', e.target.value)}
+                                        placeholder="insert"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="items">
+                            <div className="items-it">
+                                <p>Триггерные слова</p>
+                                <div className="items-blc">
+                                    <div className="trigger-words">
+                                        {(newApp.triggerWords || []).map((word, i) => (
+                                            <div key={i} className="trigger-word-item">
+                                                {word}
+                                                <button 
+                                                    onClick={() => handleRemoveTriggerWord(i)}
+                                                    className="delete-trigger"
+                                                >
+                                                    <FaTrash size={10}/>
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button 
+                                            onClick={() => setShowTriggerWordModal(true)}
+                                            className="add-trigger"
+                                        >
+                                            <FaPlus/> Добавить слово
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="items">
+                            <div className="items-it">
+                                <p></p>
+                                <div className="items-blc">
                                     <button 
-                                        onClick={() => handleRemoveTriggerWord(i)}
-                                        className="delete-trigger"
+                                        onClick={handleAddOrUpdateApp}
+                                        className="save-app-button"
                                     >
-                                        <FaTrash size={10}/>
+                                        {editingAppIndex === -1 ? 'Добавить приложение' : 'Обновить приложение'}
                                     </button>
                                 </div>
-                            ))}
-                            <button 
-                                onClick={() => setShowTriggerWordModal(true)}
-                                className="add-trigger"
-                            >
-                                <FaPlus/> Добавить слово
-                            </button>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <button 
-                        onClick={handleAddOrUpdateApp}
-                        className="save-app-button"
-                    >
-                        {editingAppIndex === -1 ? 'Добавить приложение' : 'Обновить приложение'}
-                    </button>
 
-                    <div className="apps-list">
-                        <h3>Список приложений</h3>
-                        {(apps || []).length === 0 ? (
-                            <p>Нет добавленных приложений</p>
-                        ) : (
-                            <ul>
-                                {(apps || []).map((app, index) => (
-                                    <li key={index} className="app-item">
-                                        <div className="app-info">
-                                            <strong>{app.name}</strong>
-                                            <span>{app.path}</span>
-                                            <div className="trigger-words-list">
-                                                Триггеры: {(app.triggerWords || []).join(', ')}
-                                            </div>
-                                        </div>
-                                        <div className="app-actions">
-                                            <button onClick={() => handleEditApp(index)}>
-                                                Редактировать
-                                            </button>
-                                            <button 
-                                                onClick={() => handleDeleteApp(index)}
-                                                className="delete-app"
-                                            >
-                                                Удалить
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                </>
-            )}
+                        <div className="items">
+                            <div className="items-it">
+                                <p>Список приложений</p>
+                                <div className="items-blc">
+                                    {(apps || []).length === 0 ? (
+                                        <p>Нет добавленных приложений</p>
+                                    ) : (
+                                        <ul className="apps-list">
+                                            {(apps || []).map((app, index) => (
+                                                <li key={index} className="app-item">
+                                                    <div className="app-info">
+                                                        <strong>{app.name}</strong>
+                                                        <span>{app.path}</span>
+                                                        <div className="trigger-words-list">
+                                                            Триггеры: {(app.triggerWords || []).join(', ')}
+                                                        </div>
+                                                    </div>
+                                                    <div className="app-actions">
+                                                        <button 
+                                                            onClick={() => handleEditApp(index)}
+                                                            className="edit-button"
+                                                        >
+                                                            Редактировать
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteApp(index)}
+                                                            className="delete-button"
+                                                        >
+                                                            Удалить
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
     );
 };
