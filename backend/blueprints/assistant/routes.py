@@ -9,6 +9,7 @@ import os
 import subprocess
 from .assistant_manager import AssistantManager
 from .chat_logic import process_user_query
+from .chat_utils import parse_command, execute_command
 
 # Создаем blueprint с уникальным именем
 assistant_bp = Blueprint('assistant_api', __name__, url_prefix='/api/assistant')
@@ -184,14 +185,37 @@ def chat_handler():
     """Основной endpoint для чата с ассистентом"""
     username = request.current_user
     data = request.get_json()
-    command = data.get('command', '').strip()
     
+    if not data or 'command' not in data:
+        return jsonify({'error': "Field 'command' is required"}), 400
+        
+    command = data['command'].strip()
     if not command:
         return jsonify({'error': 'Пустая команда'}), 400
     
     try:
-        response = manager._execute_command(command=command, username=username)
+        # Сначала пробуем распарсить как команду
+        parsed_command = parse_command(command, username)
         
+        if parsed_command:
+            # Если это команда - выполняем ее
+            response_text = execute_command(
+                parsed_command['action'],
+                parsed_command['target'],
+                parsed_command.get('app_path'),
+                username
+            )
+            message_type = 'command_response'
+        else:
+            # Если не команда - обрабатываем как обычный запрос
+            ai_response = process_user_query(command, username, manager)
+            ai_response = ai_response['response']
+            # Убедимся, что ответ - строка
+            response_text = ai_response if isinstance(ai_response, str) else str(ai_response)
+            # print(ai_response['response'], "=====================================================")
+            message_type = 'ai_response'
+        
+        # Сохраняем сообщения
         command_msg = {
             'text': command,
             'sender': 'user',
@@ -201,10 +225,10 @@ def chat_handler():
         }
         
         response_msg = {
-            'text': response,
+            'text': response_text,
             'sender': 'assistant',
             'timestamp': datetime.now().isoformat(),
-            'type': 'response'
+            'type': message_type
         }
         
         with manager._lock:
@@ -212,15 +236,12 @@ def chat_handler():
             manager.unread_messages[username].extend([command_msg, response_msg])
         
         return jsonify({
-            'response': response,
+            'response': response_text,
             'status': 'completed',
-            'messages': [command_msg, response_msg]
+            'messages': [command_msg, response_msg],
+            'is_command': bool(parsed_command)
         })
         
     except Exception as e:
         logger.error(f"Ошибка выполнения команды: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
-# Добавим CORS headers ко всем ответам
-
-# Обновим метод process_command для поддержки OPTIONS
