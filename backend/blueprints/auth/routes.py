@@ -3,7 +3,6 @@ from flasgger import swag_from
 from datetime import datetime
 import json
 import jwt
-# from blueprints.config import Config
 import os
 from utils.auth_utils import generate_jwt, decode_jwt, hash_password, check_password
 from utils.google_auth import get_flow, get_user_info
@@ -335,7 +334,7 @@ def save_settings():
             return jsonify({"error": "Token is missing"}), 401
 
         try:
-            token = token.split(" ")[1]  # Удаляем "Bearer "
+            token = token.split(" ")[1]
             user_data = decode_jwt(token)
             username = user_data.get('id')
         except Exception as e:
@@ -346,30 +345,30 @@ def save_settings():
         if not data:
             return jsonify({"error": "No data provided"}), 400
 
-        # 3) Загружаем пользователей с правильной кодировкой
+        # 3) Загружаем пользователей
         users = load_users()
-        user = next((u for u in users if u["username"] == username), None)
-        if not user:
+        
+        # Находим ВСЕХ пользователей с таким именем (на случай дубликатов)
+        matching_users = [u for u in users if u.get("username") == username]
+        
+        if not matching_users:
             return jsonify({"error": "User not found"}), 404
 
-        # 4) Обновляем настройки, сохраняя русские символы
-        user.setdefault('settings', {})
-        user['settings'].update({
-            "theme": data.get('theme', user['settings'].get('theme', 'light')),
-            "colors": data.get('colors', user['settings'].get('colors', {})),
-            "title_bar": data.get('title_bar', user['settings'].get('title_bar', {})),
-            "api_settings": data.get('api_settings', user['settings'].get('api_settings', {})),
-            "apps": data.get('apps', user['settings'].get('apps', [])),
-            "last_updated": datetime.now().isoformat()
-        })
+        # 4) Обновляем настройки для ВСЕХ найденных пользователей (или можно выбрать одного)
+        for user in matching_users:
+            user.setdefault('settings', {})
+            user['settings'].update({
+                "apps": data.get('apps', user['settings'].get('apps', [])),
+                "last_updated": datetime.now().isoformat()
+            })
 
-        # Сохраняем с ensure_ascii=False для корректного отображения русских символов
+        # Сохраняем всех пользователей
         with open(USERS_FILE, 'w', encoding='utf-8') as f:
             json.dump(users, f, ensure_ascii=False, indent=4)
 
         return jsonify({
             "status": "success",
-            "settings": user['settings']
+            "settings": matching_users[0]['settings']  # Возвращаем настройки первого найденного
         }), 200
 
     except Exception as e:
@@ -440,7 +439,7 @@ def get_apps():
         return jsonify({"apps": apps}), 200
 
     except Exception as e:
-        print(f"Server error in get_apps: {e}")  # <-- ВАЖНО
+        print(f"Server error in get_apps: {e}")
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 

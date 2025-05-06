@@ -5,7 +5,6 @@ import Cookies from "js-cookie";
 import { toast } from 'react-toastify';
 import icons from "../components/import/ImportSVG.jsx"
 
-// В handleSwitchUser после успешного переключения:
 
 const Account = () => {
     const [currentUser, setCurrentUser] = useState("");
@@ -151,30 +150,6 @@ const Account = () => {
 
             <div className="pattern">
                 <icons.Pattern/>
-            </div>
-        </div>
-
-        <div className="content shadow request">
-            <div className="req">
-                <p>
-                    REQUESTS VPN LEFT
-                </p>
-                <div>
-                    <p>
-                        1221212121
-                    </p>
-                </div>
-            </div>
-            <div className="req">
-                <p>
-                    TOTAL ASSISTANT REQUESTS
-                </p>
-
-                <div>
-                    <p>
-                        1221212121
-                    </p>
-                </div>
             </div>
         </div>
         </>

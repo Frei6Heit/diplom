@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import "../styles/TitleBar.scss";
 import icons from './import/ImportSVG.jsx';
-import Settings from './settings/Settings'; // Импортируем компонент Settings
+import Settings from './settings/Settings'; 
 
 const TitleBar = () => {
-    // const [isMenuOpen, setMenuOpen] = useState(false);
     const [isSettingsOpen] = useState(false);
 
     return (
@@ -13,22 +12,6 @@ const TitleBar = () => {
 
             <div className="title-bar-trapezoid">
                 <div className="title-bar-content-left">
-                    <div className="microphonet">
-                        <a className="mic">
-                            <icons.Microphone />
-                        </a>
-                        <icons.MicrophoneSl /> {/* Эта иконка не кликабельна */}
-
-                    </div>
-
-                    <div className="decoding">
-                        <a href="/account" className="mic">
-                            <icons.Video />
-                        </a>
-                        <button>
-                            <icons.Voice />
-                        </button>
-                    </div>
 
                     <div className="messaget"> 
                         <a href="/assistant" className="mic">
@@ -38,7 +21,7 @@ const TitleBar = () => {
                 </div>
 
                 <div className="title-bar-content-right">
-                    <a href="/main">
+                    <a href="/account">
                         <icons.Home />
                     </a>
                     <a href="/settings">
@@ -47,7 +30,7 @@ const TitleBar = () => {
                 </div>
             </div>
 
-            {isSettingsOpen && <Settings />} {/* Отображаем настройки, если isSettingsOpen равно true */}
+            {isSettingsOpen && <Settings />}
 
             <div className="title-bar-controls">
                 <button className="curtail" onClick={() => window.electronAPI?.windowControl.minimize()}>

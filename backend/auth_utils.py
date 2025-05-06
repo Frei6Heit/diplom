@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import jwt
 from datetime import datetime, timedelta
-from argon2 import PasswordHasher  # Используем argon2 для хеширования
+from argon2 import PasswordHasher
 
 # Загрузка переменных окружения
 load_dotenv()

@@ -140,7 +140,7 @@ class AssistantManager:
         
         state = "waiting_trigger"
         last_activity = time.time()
-        COMMAND_TIMEOUT = 10.0  # 3 секунды на команду после триггера
+        COMMAND_TIMEOUT = 10.0  # секунды на команду после триггера
 
         while not self.stop_event.is_set() and self.active:
             try:
@@ -201,7 +201,7 @@ class AssistantManager:
         self.last_command_time[username] = current_time
         logger.info(f"Обработка команды от {username}: {command_text}")
 
-        # 1. Сохраняем полученную команду
+        # Сохраняем полученную команду
         command_msg = {
             "text": command_text,
             "sender": "user",
@@ -211,7 +211,7 @@ class AssistantManager:
             "type": "command"
         }
 
-        # 2. Готовим ответ
+        # Готовим ответ
         try:
             response_text = self._execute_command(command_text, command_msg)
             status = "completed"
@@ -229,7 +229,7 @@ class AssistantManager:
             "type": "command_response"
         }
 
-        # 3. Сохраняем оба сообщения
+        # Сохраняем оба сообщения
         with self._lock:
             self.message_history[username].extend([command_msg, response_msg])
             self.unread_messages[username].extend([command_msg, response_msg])
@@ -239,7 +239,7 @@ class AssistantManager:
     def _execute_command(self, command: str, username: str) -> str:
         """Унифицированный обработчик команд"""
         try:
-            # 1. Сначала пробуем распарсить как команду (открыть приложение и т.д.)
+            # Сначала пробуем распарсить как команду (открыть приложение и т.д.)
             parsed = parse_command(command, username)
             if parsed:
                 response = execute_command(
@@ -250,7 +250,7 @@ class AssistantManager:
                 )
                 return response
             
-            # 2. Если не команда - отправляем в общую обработку вопросов
+            # Если не команда - отправляем в общую обработку вопросов
             result = process_user_query(command, username, self)
             
             # Обрабатываем разные форматы ответа от process_user_query
@@ -333,7 +333,6 @@ class AssistantManager:
 
     def _ask_ai(self, question: str) -> str:
         """Отправляет вопрос к ИИ"""
-        # Здесь должна быть ваша интеграция с ИИ
         return f"Ответ на вопрос: {question}"
     
 
@@ -377,7 +376,7 @@ class AssistantManager:
 
     def _play_notification_sound(self):
         """Воспроизведение звукового уведомления"""
-        sound_file = "notification.wav"
+        sound_file = "start_listening.wav"
         try:
             if sound_file not in self._sound_cache:
                 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -386,17 +385,13 @@ class AssistantManager:
                     self._sound_cache[sound_file] = sa.WaveObject.from_wave_file(sound_path)
                 else:
                     logger.warning(f"Файл звука не найден: {sound_file}")
-                    # Временная заглушка, если файл не найден
-                    print("\a")  # Системный beep
                     return
             
             play_obj = self._sound_cache[sound_file].play()
             play_obj.wait_done()
         except Exception as e:
             logger.error(f"Ошибка воспроизведения звука: {e}")
-            print("\a")  # Системный beep как fallback
 
-    # Остальные методы остаются без изменений
     def add_message(self, username: str, message: Dict[str, Any]):
         if not message.get('text'):
             return

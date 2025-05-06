@@ -1,6 +1,4 @@
-import time
 from datetime import datetime
-from flask import current_app
 import logging
 from openai import OpenAI
 import os

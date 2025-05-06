@@ -68,7 +68,7 @@ const Assistant = () => {
         try {
         const response = await axios.post(
             "http://localhost:5000/api/assistant/chat",
-            { command: text }, // Убедитесь, что поле называется "command"
+            { command: text },
             {
             headers: {
                 "Content-Type": "application/json",
