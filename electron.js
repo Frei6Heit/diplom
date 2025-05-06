@@ -53,11 +53,12 @@ app.on('activate', () => {
 });
 
 // Обработчики для управления окном
-ipcMain.on('minimize', () => {
+// Замените старые обработчики на эти:
+ipcMain.on('window-control:minimize', () => {
     mainWindow.minimize();
 });
 
-ipcMain.on('maximize', () => {
+ipcMain.on('window-control:maximize', () => {
     if (mainWindow.isMaximized()) {
         mainWindow.unmaximize();
     } else {
@@ -65,6 +66,19 @@ ipcMain.on('maximize', () => {
     }
 });
 
-ipcMain.on('close', () => {
+ipcMain.on('window-control:close', () => {
     mainWindow.close();
 });
+// main.js
+app.on('ready', () => {
+    // Отключаем нежелательные функции Chromium
+    app.commandLine.appendSwitch('disable-http-cache');
+    app.commandLine.appendSwitch('disable-background-timer-throttling');
+    app.commandLine.appendSwitch('disable-renderer-backgrounding');
+    
+    // Устанавливаем более стабильные параметры для сетевых запросов
+    // session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    // details.requestHeaders['Connection'] = 'keep-alive';
+    // callback({ cancel: false, requestHeaders: details.requestHeaders });
+});
+// });

@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flasgger import swag_from
 import json
-import os
 
 apps_bp = Blueprint('apps', __name__)
 TRIGGER_FILE = "./functions/dop_func/trigger.json"
@@ -56,5 +55,3 @@ def add_app():
         }), 200
     except Exception as e:
         return jsonify({"error": f"Ошибка: {str(e)}"}), 500
-    
-    

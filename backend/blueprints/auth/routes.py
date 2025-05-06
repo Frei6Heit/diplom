@@ -6,13 +6,15 @@ import jwt
 import os
 from utils.auth_utils import generate_jwt, decode_jwt, hash_password, check_password
 from utils.google_auth import get_flow, get_user_info
+import speech_recognition as sr
+import os
 
 auth_bp = Blueprint('auth', __name__)
 USERS_FILE = "./data/users.json"
 
 def load_users():
     if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, "r") as f:
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
             try:
                 return json.load(f)
             except json.JSONDecodeError:
@@ -321,3 +323,168 @@ def get_user_token():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+@auth_bp.route('/save_settings', methods=['POST'])
+def save_settings():
+    try:
+        # 1) Проверяем авторизацию через JWT
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({"error": "Token is missing"}), 401
+
+        try:
+            token = token.split(" ")[1]
+            user_data = decode_jwt(token)
+            username = user_data.get('id')
+        except Exception as e:
+            return jsonify({"error": f"Invalid token: {str(e)}"}), 401
+
+        # 2) Получаем данные запроса
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        # 3) Загружаем пользователей
+        users = load_users()
+        
+        # Находим ВСЕХ пользователей с таким именем (на случай дубликатов)
+        matching_users = [u for u in users if u.get("username") == username]
+        
+        if not matching_users:
+            return jsonify({"error": "User not found"}), 404
+
+        # 4) Обновляем настройки для ВСЕХ найденных пользователей (или можно выбрать одного)
+        for user in matching_users:
+            user.setdefault('settings', {})
+            user['settings'].update({
+                "apps": data.get('apps', user['settings'].get('apps', [])),
+                "last_updated": datetime.now().isoformat()
+            })
+
+        # Сохраняем всех пользователей
+        with open(USERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(users, f, ensure_ascii=False, indent=4)
+
+        return jsonify({
+            "status": "success",
+            "settings": matching_users[0]['settings']  # Возвращаем настройки первого найденного
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@auth_bp.route('/get_settings', methods=['GET'])
+def get_settings():
+    # Проверяем заголовок Authorization
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({"error": "Authorization header is missing or invalid"}), 401
+
+    try:
+        # Извлекаем токен
+        token = auth_header.split(" ")[1]
+        
+        # Декодируем токен
+        user_data = decode_jwt(token)
+        username = user_data.get('id')
+        
+        if not username:
+            return jsonify({"error": "Invalid token payload"}), 401
+
+        # Загружаем пользователей
+        users = load_users()
+        user = next((u for u in users if u["username"] == username), None)
+        
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+            
+        # Возвращаем настройки пользователя
+        settings = user.get('settings', {})
+        return jsonify({"settings": settings}), 200
+        
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+    
+    
+    
+@auth_bp.route('/get_apps', methods=['GET'])
+def get_apps():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({"error": "Authorization header is missing or invalid"}), 401
+
+    try:
+        token = auth_header.split(" ")[1]
+        user_data = decode_jwt(token)
+        username = user_data.get('id')
+        print(f"Decoded username: {username}")
+
+        if not username:
+            return jsonify({"error": "Invalid token payload"}), 401
+
+        users = load_users()
+        print(f"Loaded users: {users}")
+        user = next((u for u in users if u["username"] == username), None)
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        apps = user.get('apps', [])
+        print(f"Returning apps: {apps}")
+        return jsonify({"apps": apps}), 200
+
+    except Exception as e:
+        print(f"Server error in get_apps: {e}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+
+@auth_bp.route('/save_apps', methods=['POST'])
+def save_apps():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({"error": "Authorization header is missing or invalid"}), 401
+
+    try:
+        token = auth_header.split(" ")[1]
+        user_data = decode_jwt(token)
+        username = user_data.get('id')
+
+        if not username:
+            return jsonify({"error": "Invalid token payload"}), 401
+
+        users = load_users()
+        for user in users:
+            if user["username"] == username:
+                new_apps = request.json.get("apps", [])
+
+                if all(isinstance(app, str) for app in new_apps):
+                    # Удаляем дубликаты строк
+                    user["apps"] = list(set(new_apps))
+                else:
+                    # Удаляем дубликаты словарей по сериализованному ключу
+                    seen = set()
+                    unique_apps = []
+                    for app in new_apps:
+                        app_key = json.dumps(app, sort_keys=True)
+                        if app_key not in seen:
+                            seen.add(app_key)
+                            unique_apps.append(app)
+                    user["apps"] = unique_apps
+
+                # Сохраняем обновлённый список приложений
+                with open(USERS_FILE, "w", encoding="utf-8") as f:
+                    json.dump(users, f, ensure_ascii=False, indent=4)
+
+                return jsonify({"status": "success", "apps": user["apps"]}), 200
+
+        return jsonify({"error": "User not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+

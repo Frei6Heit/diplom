@@ -1,7 +1,6 @@
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-import os
 from dotenv import load_dotenv
 
 # Загрузка переменных окружения

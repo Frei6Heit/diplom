@@ -5,3 +5,5 @@ PyJWT==2.8.0
 google-auth-oauthlib==1.0.0
 google-auth==2.23.0
 google-api-python-client==2.104.0
+SpeechRecognition==3.10.0
+pydub==0.25.1

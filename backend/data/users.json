@@ -21,7 +21,105 @@
         "username": "1",
         "password": "$argon2id$v=19$m=65536,t=3,p=4$/GqugMI4mBIxPCKnOahHCw$RVWzrRjXRl1Pc7cU5h/Z6CsBnMblgihBcbCBBeVFBPE",
         "remember_me": false,
-        "timestamp": "2025-02-24T23:22:01.800019"
+        "timestamp": "2025-02-24T23:22:01.800019",
+        "settings": {
+            "theme": "white",
+            "colors": {},
+            "title_bar": {
+                "type": "standard",
+                "selectedIcon": 1
+            },
+            "api_settings": {
+                "assistant": "",
+                "textCorrection": "",
+                "vpn": ""
+            },
+            "apps": [
+                {
+                    "name": "стим",
+                    "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+                    "triggerWords": [
+                        "steam",
+                        "стим"
+                    ]
+                },
+                {
+                    "name": "с",
+                    "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+                    "triggerWords": [
+                        "стим",
+                        "steam"
+                    ]
+                },
+                {
+                    "name": "видео",
+                    "path": "E:\\видео\\2025-05-04 22-03-22.mp4",
+                    "triggerWords": [
+                        "video",
+                        "видео"
+                    ]
+                },
+                {
+                    "name": "прикол",
+                    "path": "E:\\видео\\2025-05-01 14-03-58.mp4",
+                    "triggerWords": [
+                        "прикол",
+                        "prikol"
+                    ]
+                },
+                {
+                    "name": "видео2",
+                    "path": "E:\\видео\\2025-05-01 14-03-58.mp4",
+                    "triggerWords": [
+                        "видео2",
+                        "prekol"
+                    ]
+                }
+            ],
+            "last_updated": "2025-05-05T17:28:30.844001"
+        },
+        "apps": [
+            {
+                "name": "стим",
+                "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+                "triggerWords": [
+                    "steam",
+                    "стим"
+                ]
+            },
+            {
+                "name": "с",
+                "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+                "triggerWords": [
+                    "стим",
+                    "steam"
+                ]
+            },
+            {
+                "name": "видео",
+                "path": "E:\\видео\\2025-05-04 22-03-22.mp4",
+                "triggerWords": [
+                    "video",
+                    "видео"
+                ]
+            },
+            {
+                "name": "прикол",
+                "path": "E:\\видео\\2025-05-01 14-03-58.mp4",
+                "triggerWords": [
+                    "прикол",
+                    "prikol"
+                ]
+            },
+            {
+                "name": "видео2",
+                "path": "E:\\видео\\2025-05-01 14-03-58.mp4",
+                "triggerWords": [
+                    "видео2",
+                    "prekol"
+                ]
+            }
+        ]
     },
     {
         "username": "5",

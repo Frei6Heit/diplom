@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Account.scss";
 import Cookies from "js-cookie";
 import { toast } from 'react-toastify';
-import icons from "../components/import/ImportSVG.jsx";
+import icons from "../components/import/ImportSVG.jsx"
+
 
 const Account = () => {
     const [currentUser, setCurrentUser] = useState("");
@@ -66,6 +67,7 @@ const Account = () => {
             localStorage.setItem("token", token);
             await fetchUserData(token);
             
+            // Уведомление об успешном переключении
             toast.success(`Successfully switched to ${username}`, {
                 position: "top-right",
                 autoClose: 3000,
@@ -78,6 +80,7 @@ const Account = () => {
         } catch (err) {
             console.error("Error switching user:", err);
             setError(err.message);
+            // Уведомление об ошибке
             toast.error(`Failed to switch to ${username}: ${err.message}`, {
                 position: "top-right",
                 autoClose: 5000,
@@ -112,58 +115,43 @@ const Account = () => {
 
     return (
         <>
-            <div className="account-container shadow">
-                <div className="account-header">
-                    <h1>account information</h1>
-                </div>
-
-                <div className="user-info shadow">
-                    <h2>current user: <span className="username">{currentUser}</span></h2>
-                    
-                    {otherUsers.length > 0 && (
-                        <div className="other-users">
-                            <h3>other accounts on this device:</h3>
-                            <ul>
-                                {otherUsers.map((user, index) => (
-                                    <li key={index}>
-                                        <span>{user}</span>
-                                        <button 
-                                            onClick={() => handleSwitchUser(user)}
-                                            className="switch-btn"
-                                            disabled={loading}
-                                        >
-                                            {loading ? "switching..." : "switch"}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    <button onClick={handleLogout} className="logout-btn">
-                        logout <icons.LogOut />
-                    </button>
-                </div>
-
-                <div className="pattern">
-                    <icons.Pattern/>
-                </div>
+        <div className="account-container shadow">
+            <div className="account-header">
+                <h1>account information</h1>
             </div>
 
-            <div className="content shadow request">
-                <div className="req">
-                    <p>REQUESTS VPN LEFT</p>
-                    <div>
-                        <p>1221212121</p>
+            <div className="user-info shadow">
+                <h2>current user: <span className="username">{currentUser}</span></h2>
+                
+                {otherUsers.length > 0 && (
+                    <div className="other-users">
+                        <h3>other accounts on this device:</h3>
+                        <ul>
+                            {otherUsers.map((user, index) => (
+                                <li key={index}>
+                                    <span>{user}</span>
+                                    <button 
+                                        onClick={() => handleSwitchUser(user)}
+                                        className="switch-btn"
+                                        disabled={loading}
+                                    >
+                                        {loading ? "switching..." : "switch"}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
-                </div>
-                <div className="req">
-                    <p>TOTAL ASSISTANT REQUESTS</p>
-                    <div>
-                        <p>1221212121</p>
-                    </div>
-                </div>
+                )}
+
+                <button onClick={handleLogout} className="logout-btn">
+                    logout <icons.LogOut />
+                </button>
             </div>
+
+            <div className="pattern">
+                <icons.Pattern/>
+            </div>
+        </div>
         </>
     );
 };
