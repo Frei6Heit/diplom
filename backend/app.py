@@ -14,7 +14,7 @@ CORS(app, resources={
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     },
-    r"/auth/*": { 
+    r"/auth/*": {  # Добавляем правило для /auth/*
         "origins": ["http://localhost:3000"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]

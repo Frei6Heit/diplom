@@ -15,6 +15,7 @@ const Auth = () => {
     const passwordRef = useRef(null);
 
     // Проверка авторизации при загрузке компонента
+    // Добавьте этот useEffect в ваш Auth.jsx
     useEffect(() => {
         const checkAuth = () => {
         const token = localStorage.getItem("token");
@@ -118,7 +119,7 @@ const Auth = () => {
         if (data.redirect_url) {
             window.location.href = data.redirect_url;
         } else {
-            navigate("/main", { replace: true });
+            navigate("/main", { replace: true }); // replace: true предотвращает возврат через кнопку "назад"
         }
         } catch (error) {
         console.error("Ошибка:", error);

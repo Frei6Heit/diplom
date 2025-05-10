@@ -1,85 +1,70 @@
-Electron+Flask
-Flask
-Python
-Node.js
-Это гибридное приложение, сочетающее мощь Electron для desktop и простоту Flask для backend. Следуйте инструкциям ниже для запуска проекта.
+# Getting Started with Create React App
 
-📋 Предварительные требования
-Перед началом убедитесь, что у вас установлены:
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-Node.js v18+ (LTS версия рекомендована)
+## Available Scripts
 
-Python 3.10+
+In the project directory, you can run:
 
-Git (для клонирования репозитория)
+### `npm start`
 
-🛠 Установка и запуск
-1. Клонирование репозитория
-bash
-git clone https://github.com/yourusername/yourproject.git
-cd yourproject
-2. Установка зависимостей
-Откройте три отдельных терминала в папке проекта:
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-Терминал 1 (Backend):
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-bash
-cd backend
-pip install -r requirements.txt
-Терминал 2 (Frontend):
+### `npm test`
 
-bash
-npm install
-Терминал 3 (Frontend UI):
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-bash
-cd frontend
-npm install
-3. Запуск приложения
-В каждом из трех терминалов выполните:
+### `npm run build`
 
-Терминал 1 (Backend - Flask сервер):
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-bash
-cd backend
-python app.py
-Терминал 2 (Frontend - React/Vue dev server):
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-bash
-cd frontend
-npm start
-Терминал 3 (Electron приложение):
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-bash
-cd frontend
-npm run electron-dev
-🌟 Особенности архитектуры
-yourproject/
-├── backend/          # Flask приложение
-│   ├── app.py        # Основной файл Flask
-│   └── requirements.txt
-├── frontend/         # Electron + React/Vue
-│   ├── public/       
-│   ├── src/          
-│   └── package.json
-└── main.js           # Главный процесс Electron
-🔧 Возможные проблемы и решения
-Ошибки Python зависимостей:
+### `npm run eject`
 
-bash
-python -m pip install --upgrade pip
-pip install -r requirements.txt --force-reinstall
-Node.js версия не подходит:
-Установите nvm и используйте нужную версию:
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-bash
-nvm install 18
-nvm use 18
-Electron не запускается:
-Удалите node_modules и переустановите:
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-bash
-rm -rf node_modules package-lock.json
-npm install
-📜 Лицензия
-MIT License © 2023 [Ваше Имя]
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

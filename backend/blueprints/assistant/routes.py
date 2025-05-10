@@ -178,6 +178,7 @@ def process_command():
         return jsonify({'error': str(e)}), 500
 
 
+# Добавим новый endpoint для чата
 @assistant_bp.route('/chat', methods=['POST'])
 @token_required
 def chat_handler():
@@ -209,7 +210,9 @@ def chat_handler():
             # Если не команда - обрабатываем как обычный запрос
             ai_response = process_user_query(command, username, manager)
             ai_response = ai_response['response']
+            # Убедимся, что ответ - строка
             response_text = ai_response if isinstance(ai_response, str) else str(ai_response)
+            # print(ai_response['response'], "=====================================================")
             message_type = 'ai_response'
         
         # Сохраняем сообщения

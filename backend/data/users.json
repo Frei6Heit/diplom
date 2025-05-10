@@ -23,8 +23,24 @@
         "remember_me": false,
         "timestamp": "2025-02-24T23:22:01.800019",
         "settings": {
-            "theme": "white",
-            "colors": {},
+            "theme": "custom",
+            "colors": {
+                "primary-color": "#333333",
+                "secondary-color": "#DD9090",
+                "background-color": "black",
+                "border-color": "#444",
+                "button-color": "#237E3F",
+                "text-color": "white",
+                "contrast-text-color": "#000",
+                "card-background": "#222",
+                "shadow-color": "rgba(255, 255, 255, 0.1)",
+                "warning-background": "#333",
+                "warning-text": "#ffcc00",
+                "input-border": "#444",
+                "input-background": "#222",
+                "preview-border": "#444",
+                "section-background": "#1a1a1a"
+            },
             "title_bar": {
                 "type": "standard",
                 "selectedIcon": 1
@@ -58,25 +74,9 @@
                         "video",
                         "видео"
                     ]
-                },
-                {
-                    "name": "прикол",
-                    "path": "E:\\видео\\2025-05-01 14-03-58.mp4",
-                    "triggerWords": [
-                        "прикол",
-                        "prikol"
-                    ]
-                },
-                {
-                    "name": "видео2",
-                    "path": "E:\\видео\\2025-05-01 14-03-58.mp4",
-                    "triggerWords": [
-                        "видео2",
-                        "prekol"
-                    ]
                 }
             ],
-            "last_updated": "2025-05-05T17:28:30.844001"
+            "last_updated": "2025-05-05T17:04:51.789036"
         },
         "apps": [
             {
@@ -101,22 +101,6 @@
                 "triggerWords": [
                     "video",
                     "видео"
-                ]
-            },
-            {
-                "name": "прикол",
-                "path": "E:\\видео\\2025-05-01 14-03-58.mp4",
-                "triggerWords": [
-                    "прикол",
-                    "prikol"
-                ]
-            },
-            {
-                "name": "видео2",
-                "path": "E:\\видео\\2025-05-01 14-03-58.mp4",
-                "triggerWords": [
-                    "видео2",
-                    "prekol"
                 ]
             }
         ]

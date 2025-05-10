@@ -1,3 +1,5 @@
+# blueprints/assistant/chat_utils.py
+
 import json
 import os
 import subprocess
@@ -19,6 +21,7 @@ SITE_URLS = {
     'вк': 'https://vk.com',
     'vk': 'https://vk.com',
     'youtube': 'https://youtube.com',
+    # Добавь нужные сайты
 }
 
 _cached_users = None
