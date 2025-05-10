@@ -4,7 +4,6 @@ import "./styles/main.scss";
 
 import TitleBar from './components/TitleBar';
 import Auth from './components/Auth';
-import Main from './components/Main';
 import Settings from './components/settings/Settings';
 import Assistant from './components/Assistant';
 import Account from './components/Account';
@@ -19,7 +18,6 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Auth />} />
                     <Route path="/login" element={<Auth />} />
-                    <Route path="/main" element={<Main />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/assistant" element={<Assistant />} />
                     <Route path="/account" element={<Account />} />

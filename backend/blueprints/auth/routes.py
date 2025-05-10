@@ -486,5 +486,3 @@ def save_apps():
 
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-
